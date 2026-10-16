@@ -1,0 +1,2416 @@
+<!DOCTYPE html>
+<html lang="pl" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dom - Razem ogarniamy dom</title>
+  
+  <!-- PWA & Mobile Web App meta tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#F6F3EE">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <!-- Google Fonts: Plus Jakarta Sans & Caveat -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            handwriting: ['"Caveat"', 'cursive', 'sans-serif'],
+          },
+          colors: {
+            cream: {
+              50: '#FAF8F5',
+              100: '#F6F3EE',
+              200: '#EDE7DE',
+              300: '#E4DDD2',
+              400: '#D5CCC0',
+            },
+            darkBg: {
+              900: '#1A1815',
+              800: '#24211D',
+              700: '#322E28',
+              600: '#433E37',
+            },
+            sage: {
+              50: '#F2F7F0',
+              100: '#E5EFE2',
+              200: '#CBE0C4',
+              500: '#5E8250',
+              600: '#4F6F42',
+              700: '#3D5933',
+            },
+            amberAccent: {
+              50: '#FCF7ED',
+              100: '#FAF0E1',
+              200: '#F3DFC1',
+              500: '#BD8E48',
+              600: '#A47936',
+            },
+            skyAccent: {
+              50: '#F0F5FA',
+              100: '#E5ECF4',
+              200: '#CADCEB',
+              500: '#55789A',
+              600: '#456482',
+            },
+            roseAccent: {
+              50: '#FAF0F0',
+              100: '#F7E3E3',
+              200: '#EFC4C4',
+              500: '#E08484',
+              600: '#C76A6A',
+            },
+            charcoal: {
+              700: '#4A443E',
+              800: '#342F2A',
+              900: '#23201D',
+            }
+          },
+          boxShadow: {
+            card: '0 2px 14px 0 rgba(70, 55, 40, 0.04)',
+            modal: '0 20px 45px -10px rgba(0, 0, 0, 0.2)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #F6F3EE;
+      color: #23201D;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Dark mode body */
+    .dark body {
+      background-color: #1A1815;
+      color: #EDE7DE;
+    }
+    
+    .transition-all-fast {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D9D2C7;
+      border-radius: 9999px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #433E37;
+    }
+
+    .gauge-circle {
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+      transition: stroke-dashoffset 0.6s ease;
+    }
+
+    /* Tab switching animation */
+    .tab-view {
+      animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Custom toggle switch */
+    .toggle-checkbox:checked {
+      right: 0;
+      border-color: #5E8250;
+      background-color: #5E8250;
+    }
+    .toggle-checkbox:checked + .toggle-label {
+      background-color: #5E8250;
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col md:flex-row antialiased selection:bg-amberAccent-100 selection:text-amberAccent-600">
+
+  <!-- ================= MOBILE TOP HEADER ================= -->
+  <div class="md:hidden flex items-center justify-between px-5 py-3.5 bg-[#F6F3EE] dark:bg-darkBg-900 border-b border-stone-200/60 dark:border-darkBg-700 sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+      <button onclick="toggleMobileDrawer()" class="p-2 -ml-2 rounded-xl text-charcoal-800 dark:text-stone-200 hover:bg-cream-200 dark:hover:bg-darkBg-700 transition" aria-label="Menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+      <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('home')">
+        <svg class="w-5 h-5 fill-current text-charcoal-900 dark:text-cream-100" viewBox="0 0 24 24">
+          <path d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3z"/>
+        </svg>
+        <span class="font-bold text-lg text-charcoal-900 dark:text-cream-100">Dom</span>
+      </div>
+    </div>
+
+    <!-- Active Tab Label badge, Sync status & Family mini avatars -->
+    <div class="flex items-center gap-2">
+      <button onclick="switchTab('settings')" class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-cream-200 dark:bg-darkBg-700 text-stone-600 dark:text-stone-300 text-[10px] font-semibold" title="Baza danych w GitHub">
+        <span id="mobile-sync-dot" class="w-1.5 h-1.5 rounded-full bg-stone-400"></span>
+        <span id="mobile-sync-label">Lokalnie</span>
+      </button>
+      <span id="mobile-tab-badge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-cream-200 dark:bg-darkBg-700 text-charcoal-800 dark:text-stone-300">
+        Strona główna
+      </span>
+      <div class="flex items-center -space-x-1" onclick="openFamilyModal()">
+        <img src="assets/avatar-agnieszka.png" class="w-7 h-7 rounded-full object-cover ring-2 ring-white dark:ring-darkBg-900">
+        <img src="assets/avatar-marek.png" class="w-7 h-7 rounded-full object-cover ring-2 ring-white dark:ring-darkBg-900">
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MOBILE DRAWER (Off-canvas) ================= -->
+  <div id="mobile-drawer" class="fixed inset-0 z-50 md:hidden hidden">
+    <!-- Backdrop -->
+    <div onclick="toggleMobileDrawer()" class="absolute inset-0 bg-charcoal-900/50 backdrop-blur-xs transition-opacity duration-300 opacity-0" id="drawer-backdrop"></div>
+    
+    <!-- Drawer Panel -->
+    <div class="absolute inset-y-0 left-0 w-72 max-w-[85%] bg-[#F6F3EE] dark:bg-darkBg-900 p-6 flex flex-col justify-between shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out" id="drawer-panel">
+      <div>
+        <div class="flex items-center justify-between mb-8">
+          <div class="flex items-center gap-2.5">
+            <svg class="w-6 h-6 fill-current text-charcoal-900 dark:text-cream-100" viewBox="0 0 24 24">
+              <path d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3z"/>
+            </svg>
+            <span class="text-xl font-bold tracking-tight text-charcoal-900 dark:text-cream-100">Dom</span>
+          </div>
+          <button onclick="toggleMobileDrawer()" class="w-8 h-8 rounded-full flex items-center justify-center text-stone-500 hover:bg-cream-200 dark:hover:bg-darkBg-700 transition">
+            ✕
+          </button>
+        </div>
+
+        <nav class="space-y-1.5" id="mobile-sidebar-nav">
+          <button onclick="switchTab('home'); toggleMobileDrawer()" data-tab="home" class="w-full mobile-nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-semibold text-charcoal-900 dark:text-cream-100 bg-cream-200 dark:bg-darkBg-700 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Strona główna</span>
+          </button>
+
+          <button onclick="switchTab('tasks'); toggleMobileDrawer()" data-tab="tasks" class="w-full mobile-nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-cream-100 dark:hover:bg-darkBg-800 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span>Zadania</span>
+          </button>
+
+          <button onclick="switchTab('calendar'); toggleMobileDrawer()" data-tab="calendar" class="w-full mobile-nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-cream-100 dark:hover:bg-darkBg-800 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Kalendarz</span>
+          </button>
+
+          <button onclick="switchTab('shopping'); toggleMobileDrawer()" data-tab="shopping" class="w-full mobile-nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-cream-100 dark:hover:bg-darkBg-800 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+            <span>Lista zakupów</span>
+          </button>
+
+          <button onclick="switchTab('settings'); toggleMobileDrawer()" data-tab="settings" class="w-full mobile-nav-item flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:bg-cream-100 dark:hover:bg-darkBg-800 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Ustawienia</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-stone-200/50 dark:border-darkBg-700 text-center select-none">
+        <p id="drawer-quote-text" class="font-handwriting text-stone-500 dark:text-stone-400 text-lg leading-snug">
+          Małe rzeczy<br>tworzą wielki dom
+        </p>
+        <div class="mt-1 text-stone-400 text-sm">♡</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DESKTOP SIDEBAR ================= -->
+  <aside class="hidden md:flex w-60 lg:w-64 shrink-0 p-6 lg:p-8 flex-col justify-between select-none">
+    <div>
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 mb-8 cursor-pointer group" onclick="switchTab('home')">
+        <div class="w-7 h-7 flex items-center justify-center text-charcoal-900 dark:text-cream-100 group-hover:scale-105 transition-transform">
+          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+            <path d="M12 3L2 12h3v8h6v-5h2v5h6v-8h3L12 3z"/>
+          </svg>
+        </div>
+        <span class="text-xl font-bold tracking-tight text-charcoal-900 dark:text-cream-100">Dom</span>
+      </div>
+
+      <!-- Navigation links -->
+      <nav class="space-y-1.5" id="sidebar-nav">
+        <!-- Strona główna -->
+        <button onclick="switchTab('home')" data-tab="home" class="w-full sidebar-nav-item flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-charcoal-900 dark:text-cream-100 bg-cream-200 dark:bg-darkBg-700 transition-all-fast shadow-xs text-left">
+          <svg class="w-5 h-5 text-charcoal-800 dark:text-cream-100" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span>Strona główna</span>
+        </button>
+
+        <!-- Zadania -->
+        <button onclick="switchTab('tasks')" data-tab="tasks" class="w-full sidebar-nav-item flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-charcoal-900 dark:hover:text-cream-100 hover:bg-cream-100 dark:hover:bg-darkBg-800 transition-all-fast text-left">
+          <svg class="w-5 h-5 text-stone-500 dark:text-stone-400" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <polyline points="9 11 12 14 22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          <span class="flex-1">Zadania</span>
+          <span id="nav-badge-tasks" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-sage-100 text-sage-600 dark:bg-sage-900/40 dark:text-sage-300">5</span>
+        </button>
+
+        <!-- Kalendarz -->
+        <button onclick="switchTab('calendar')" data-tab="calendar" class="w-full sidebar-nav-item flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-charcoal-900 dark:hover:text-cream-100 hover:bg-cream-100 dark:hover:bg-darkBg-800 transition-all-fast text-left">
+          <svg class="w-5 h-5 text-stone-500 dark:text-stone-400" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <span>Kalendarz</span>
+        </button>
+
+        <!-- Lista zakupów -->
+        <button onclick="switchTab('shopping')" data-tab="shopping" class="w-full sidebar-nav-item flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-charcoal-900 dark:hover:text-cream-100 hover:bg-cream-100 dark:hover:bg-darkBg-800 transition-all-fast text-left">
+          <svg class="w-5 h-5 text-stone-500 dark:text-stone-400" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <circle cx="8" cy="21" r="1"/>
+            <circle cx="19" cy="21" r="1"/>
+            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+          </svg>
+          <span class="flex-1">Lista zakupów</span>
+          <span id="nav-badge-shopping" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-skyAccent-100 text-skyAccent-600 dark:bg-skyAccent-900/40 dark:text-skyAccent-300">5</span>
+        </button>
+
+        <!-- Ustawienia -->
+        <button onclick="switchTab('settings')" data-tab="settings" class="w-full sidebar-nav-item flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-charcoal-900 dark:hover:text-cream-100 hover:bg-cream-100 dark:hover:bg-darkBg-800 transition-all-fast text-left">
+          <svg class="w-5 h-5 text-stone-500 dark:text-stone-400" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>Ustawienia</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Bottom handwritten quote -->
+    <div class="mt-8 pt-6 text-center select-none">
+      <p id="sidebar-quote-text" class="font-handwriting text-stone-500 dark:text-stone-400 text-lg leading-snug">
+        Małe rzeczy<br>tworzą wielki dom
+      </p>
+      <div class="mt-1 text-stone-400 text-sm">
+        ♡
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT CONTAINER ================= -->
+  <main class="flex-1 p-4 sm:p-6 md:p-8 lg:p-10 max-w-7xl mx-auto w-full pb-20 md:pb-10">
+
+    <!-- ================= VIEW 1: STRONA GŁÓWNA (DASHBOARD) ================= -->
+    <div id="view-home" class="tab-view space-y-7">
+      
+      <!-- Top Header -->
+      <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-charcoal-900 dark:text-cream-100">Cześć, Rodzino!</h1>
+          <p class="text-stone-500 dark:text-stone-400 text-sm font-normal mt-1 flex items-center gap-1.5">
+            Razem ogarniamy dom
+            <span class="text-stone-400">♡</span>
+          </p>
+        </div>
+
+        <!-- Sync Badge & Family Avatars -->
+        <div class="flex items-center gap-3">
+          <button onclick="switchTab('settings')" id="desktop-sync-badge" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-cream-200 dark:bg-darkBg-700 text-stone-600 dark:text-stone-300 hover:bg-cream-300 transition" title="Status bazy w GitHub">
+            <span id="desktop-sync-dot" class="w-2 h-2 rounded-full bg-stone-400"></span>
+            <span id="desktop-sync-label">Baza: Lokalnie</span>
+          </button>
+          
+          <div class="flex items-center -space-x-1.5" id="header-avatar-group">
+            <img src="assets/avatar-agnieszka.png" alt="Agnieszka" title="Agnieszka" class="w-9 h-9 rounded-full object-cover ring-2 ring-white dark:ring-darkBg-800 shadow-xs cursor-pointer hover:scale-105 transition-transform" onclick="openFamilyModal()">
+            <img src="assets/avatar-marek.png" alt="Marek" title="Marek" class="w-9 h-9 rounded-full object-cover ring-2 ring-white dark:ring-darkBg-800 shadow-xs cursor-pointer hover:scale-105 transition-transform" onclick="openFamilyModal()">
+            <img src="assets/avatar-ania.png" alt="Ania" title="Ania" class="w-9 h-9 rounded-full object-cover ring-2 ring-white dark:ring-darkBg-800 shadow-xs cursor-pointer hover:scale-105 transition-transform" onclick="openFamilyModal()">
+          </div>
+          <button onclick="openFamilyModal()" class="w-8 h-8 rounded-full border border-stone-300/80 dark:border-darkBg-600 bg-white/70 dark:bg-darkBg-700 hover:bg-white dark:hover:bg-darkBg-600 flex items-center justify-center text-stone-600 dark:text-stone-300 transition shadow-xs ml-1 cursor-pointer" title="Zarządzaj rodziną">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Top 3 Summary KPI Cards -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        
+        <!-- Card 1: Zadania na dziś -->
+        <div onclick="switchTab('tasks')" class="bg-white dark:bg-darkBg-800 rounded-[20px] p-5 shadow-card border border-stone-200/40 dark:border-darkBg-700 flex flex-col justify-between cursor-pointer hover:shadow-md transition">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-sage-100 dark:bg-sage-900/30 flex items-center justify-center text-sage-600 dark:text-sage-400 shrink-0">
+              <svg class="w-6 h-6 stroke-current" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            </div>
+            <div>
+              <span class="text-xs font-medium text-stone-500 dark:text-stone-400 block">Zadania na dziś</span>
+              <div class="text-2xl font-bold text-charcoal-900 dark:text-cream-100 tracking-tight">
+                <span id="top-today-done">6</span> <span class="text-stone-400 font-normal text-xl">/</span> <span id="top-today-total">8</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-1">
+            <div class="h-2 w-full bg-cream-200 dark:bg-darkBg-700 rounded-full overflow-hidden">
+              <div id="top-today-bar" class="h-full bg-sage-500 rounded-full transition-all duration-500" style="width: 75%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Zadania na ten tydzień -->
+        <div onclick="switchTab('calendar')" class="bg-white dark:bg-darkBg-800 rounded-[20px] p-5 shadow-card border border-stone-200/40 dark:border-darkBg-700 flex flex-col justify-between cursor-pointer hover:shadow-md transition">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-amberAccent-100 dark:bg-amberAccent-900/30 flex items-center justify-center text-amberAccent-500 shrink-0">
+              <svg class="w-6 h-6 stroke-current" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+                <circle cx="8" cy="14" r="1" fill="currentColor"/>
+                <circle cx="12" cy="14" r="1" fill="currentColor"/>
+                <circle cx="16" cy="14" r="1" fill="currentColor"/>
+              </svg>
+            </div>
+            <div>
+              <span class="text-xs font-medium text-stone-500 dark:text-stone-400 block">Zadania na ten tydzień</span>
+              <div class="text-2xl font-bold text-charcoal-900 dark:text-cream-100 tracking-tight">
+                <span id="top-week-done">28</span> <span class="text-stone-400 font-normal text-xl">/</span> <span id="top-week-total">40</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-1">
+            <div class="h-2 w-full bg-cream-200 dark:bg-darkBg-700 rounded-full overflow-hidden">
+              <div id="top-week-bar" class="h-full bg-amberAccent-500 rounded-full transition-all duration-500" style="width: 70%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Lista zakupów -->
+        <div onclick="switchTab('shopping')" class="bg-white dark:bg-darkBg-800 rounded-[20px] p-5 shadow-card border border-stone-200/40 dark:border-darkBg-700 flex flex-col justify-between sm:col-span-2 lg:col-span-1 cursor-pointer hover:shadow-md transition">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-skyAccent-100 dark:bg-skyAccent-900/30 flex items-center justify-center text-skyAccent-500 shrink-0">
+              <svg class="w-6 h-6 stroke-current" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <circle cx="8" cy="21" r="1"/>
+                <circle cx="19" cy="21" r="1"/>
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+              </svg>
+            </div>
+            <div>
+              <span class="text-xs font-medium text-stone-500 dark:text-stone-400 block">Lista zakupów</span>
+              <div class="text-2xl font-bold text-charcoal-900 dark:text-cream-100 tracking-tight">
+                <span id="top-shopping-count">5</span> <span class="text-base font-normal text-stone-600 dark:text-stone-400">pozycji</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 flex justify-end">
+            <span class="text-xs font-medium text-skyAccent-500 hover:text-skyAccent-600 flex items-center gap-1 group">
+              Zobacz listę
+              <span class="group-hover:translate-x-0.5 transition-transform">→</span>
+            </span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Main Dashboard 2-column Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-7">
+
+        <!-- LEFT COLUMN (Tasks + Family Contribution) -->
+        <div class="lg:col-span-7 space-y-7">
+
+          <!-- Card: Zadania na dziś -->
+          <section class="bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-7 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+            <div class="flex items-center justify-between mb-5">
+              <div class="flex items-center gap-2">
+                <h2 class="text-lg font-bold text-charcoal-900 dark:text-cream-100">Zadania na dziś</h2>
+                <button onclick="switchTab('tasks')" class="text-xs text-stone-400 hover:text-charcoal-800 dark:hover:text-cream-100 font-medium">
+                  (zobacz wszystkie)
+                </button>
+              </div>
+              <div class="text-base font-semibold text-charcoal-800 dark:text-cream-100">
+                <span id="tasks-done-count">6</span> <span class="text-stone-400 font-normal">/</span> <span id="tasks-total-count">8</span>
+              </div>
+            </div>
+
+            <!-- Task List on Dashboard -->
+            <div class="space-y-3" id="task-list">
+              <!-- Dynamically populated -->
+            </div>
+
+            <!-- Add Task Button -->
+            <div class="mt-6 pt-1 flex items-center justify-between">
+              <button onclick="openAddTaskModal()" class="px-5 py-2.5 rounded-full bg-cream-200 dark:bg-darkBg-700 hover:bg-cream-300 dark:hover:bg-darkBg-600 text-charcoal-800 dark:text-stone-200 text-xs font-semibold flex items-center gap-2 cursor-pointer transition-all-fast shadow-xs">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Dodaj zadanie
+              </button>
+
+              <button onclick="switchTab('tasks')" class="text-xs font-medium text-stone-500 hover:text-charcoal-900 dark:hover:text-cream-100 transition">
+                Zarządzaj zadaniami →
+              </button>
+            </div>
+          </section>
+
+          <!-- Card: Udział w obowiązkach -->
+          <section class="bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-7 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+            <div class="flex items-center justify-between mb-5">
+              <div>
+                <h2 class="text-base font-bold text-charcoal-900 dark:text-cream-100">Udział w obowiązkach</h2>
+                <span class="text-xs text-stone-400">Ten tydzień</span>
+              </div>
+              <button onclick="switchTab('settings')" class="text-xs text-stone-400 hover:text-charcoal-900 dark:hover:text-cream-100 transition">
+                Edytuj skład
+              </button>
+            </div>
+
+            <!-- 4 Family Members Grid (responsive 2-cols on mobile, 4-cols on sm+) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center" id="family-gauges-container">
+              <!-- Dynamically populated in JS -->
+            </div>
+          </section>
+
+        </div>
+
+        <!-- RIGHT COLUMN (Week Plan + Shopping List + Cozy Quote Card) -->
+        <div class="lg:col-span-5 space-y-7">
+
+          <!-- Card: Plan tygodnia -->
+          <section class="bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-7 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+            <div class="flex items-center justify-between mb-5">
+              <h2 class="text-base font-bold text-charcoal-900 dark:text-cream-100">Plan tygodnia</h2>
+              <!-- Date range switcher -->
+              <div class="flex items-center gap-2 text-xs font-semibold text-stone-700 dark:text-stone-300">
+                <button onclick="changeWeek(-1)" class="w-6 h-6 flex items-center justify-center hover:bg-cream-100 dark:hover:bg-darkBg-700 rounded-lg text-stone-500 transition">
+                  ‹
+                </button>
+                <span id="week-dates-label">12 – 18 maja</span>
+                <button onclick="changeWeek(1)" class="w-6 h-6 flex items-center justify-center hover:bg-cream-100 dark:hover:bg-darkBg-700 rounded-lg text-stone-500 transition">
+                  ›
+                </button>
+              </div>
+            </div>
+
+            <!-- Days List with dots -->
+            <div class="space-y-2.5" id="week-days-list">
+              <!-- Dynamically populated -->
+            </div>
+          </section>
+
+          <!-- Card: Lista zakupów (Mini) -->
+          <section id="shopping-card" class="bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-7 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('shopping')">
+                <div class="w-10 h-10 rounded-full bg-skyAccent-100 dark:bg-skyAccent-900/30 flex items-center justify-center text-skyAccent-500">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 0 1-8 0"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-sm font-bold text-charcoal-900 dark:text-cream-100 leading-tight">Lista zakupów</h2>
+                  <span id="shopping-count-label" class="text-xs text-stone-400 font-medium">5 pozycji</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1">
+                <button onclick="toggleAddShoppingInput()" class="text-stone-400 hover:text-charcoal-800 dark:hover:text-cream-100 transition p-1.5 rounded-lg hover:bg-cream-100 dark:hover:bg-darkBg-700" title="Szybkie dodanie">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                </button>
+                <button onclick="switchTab('shopping')" class="text-stone-400 hover:text-charcoal-800 dark:hover:text-cream-100 transition p-1.5 rounded-lg hover:bg-cream-100 dark:hover:bg-darkBg-700" title="Przejdź do pełnej listy">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Quick Add Input -->
+            <div id="quick-shopping-form" class="hidden mb-4">
+              <div class="flex gap-2">
+                <input type="text" id="new-shopping-input" onkeydown="if(event.key==='Enter') addShoppingItem()" placeholder="Co kupić? (np. Masło)..." class="flex-1 text-xs px-3.5 py-2 rounded-xl border border-stone-200 dark:border-darkBg-600 bg-white dark:bg-darkBg-900 text-charcoal-900 dark:text-cream-100 focus:outline-none focus:ring-2 focus:ring-skyAccent-500/30">
+                <button onclick="addShoppingItem()" class="px-3 py-2 rounded-xl bg-skyAccent-500 text-white text-xs font-semibold hover:bg-skyAccent-600 transition">Dodaj</button>
+              </div>
+            </div>
+
+            <!-- Shopping Items List -->
+            <div class="space-y-2.5" id="shopping-list">
+              <!-- Dynamically populated -->
+            </div>
+          </section>
+
+          <!-- Card: Cozy Photo Card with Quote -->
+          <div class="relative rounded-[24px] overflow-hidden shadow-card min-h-[160px] flex flex-col justify-between group cursor-pointer" onclick="openQuoteEditorModal()">
+            <img src="assets/quote-card.png" alt="Dom to nie miejsce, to ludzie." class="w-full h-full object-cover rounded-[24px] group-hover:scale-[1.02] transition-transform duration-500">
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= VIEW 2: ZADANIA (TASKS VIEW) ================= -->
+    <div id="view-tasks" class="tab-view hidden space-y-6">
+      
+      <!-- Tasks Header -->
+      <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-charcoal-900 dark:text-cream-100">Wszystkie Zadania</h1>
+          <p class="text-stone-500 dark:text-stone-400 text-sm mt-0.5">Zarządzaj obowiązkami domowymi całej rodziny</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="clearCompletedTasks()" class="px-4 py-2 rounded-xl border border-stone-200 dark:border-darkBg-700 text-stone-600 dark:text-stone-300 text-xs font-semibold hover:bg-cream-100 dark:hover:bg-darkBg-800 transition">
+            Wyczyść ukończone
+          </button>
+          <button onclick="openAddTaskModal()" class="px-4 py-2 rounded-xl bg-sage-500 hover:bg-sage-600 text-white text-xs font-semibold flex items-center gap-2 transition shadow-xs">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Dodaj zadanie
+          </button>
+        </div>
+      </header>
+
+      <!-- Task Controls & Filters -->
+      <div class="bg-white dark:bg-darkBg-800 rounded-[20px] p-4 sm:p-5 shadow-card border border-stone-200/40 dark:border-darkBg-700 flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+        
+        <!-- Search bar -->
+        <div class="relative flex-1 max-w-md">
+          <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="tasks-search-input" oninput="renderFullTasksView()" placeholder="Szukaj zadania..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-stone-200 dark:border-darkBg-700 bg-cream-50 dark:bg-darkBg-900 text-charcoal-900 dark:text-cream-100 text-xs focus:outline-none focus:ring-2 focus:ring-sage-500/40">
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0" id="tasks-filter-pills">
+          <button onclick="setTaskFilter('all')" data-filter="all" class="task-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-cream-200 dark:bg-darkBg-700 text-charcoal-900 dark:text-cream-100 transition">
+            Wszystkie
+          </button>
+          <button onclick="setTaskFilter('pending')" data-filter="pending" class="task-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-stone-600 dark:text-stone-400 hover:bg-cream-100 dark:hover:bg-darkBg-700 transition">
+            Do zrobienia
+          </button>
+          <button onclick="setTaskFilter('completed')" data-filter="completed" class="task-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-stone-600 dark:text-stone-400 hover:bg-cream-100 dark:hover:bg-darkBg-700 transition">
+            Ukończone
+          </button>
+        </div>
+
+        <!-- Assignee Filter dropdown -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-stone-400 hidden sm:inline">Osoba:</span>
+          <select id="tasks-assignee-filter" onchange="renderFullTasksView()" class="text-xs font-medium px-3 py-2 rounded-xl border border-stone-200 dark:border-darkBg-700 bg-cream-50 dark:bg-darkBg-900 text-charcoal-800 dark:text-cream-100 focus:outline-none">
+            <option value="all">Wszyscy domownicy</option>
+            <option value="Agnieszka">Agnieszka</option>
+            <option value="Marek">Marek</option>
+            <option value="Ania">Ania</option>
+            <option value="Pies">Pies</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Tasks List Card -->
+      <div class="bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-7 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+        <div class="flex items-center justify-between pb-4 mb-4 border-b border-stone-100 dark:border-darkBg-700">
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-bold text-charcoal-900 dark:text-cream-100">Lista obowiązków</h2>
+            <span id="full-tasks-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-cream-200 dark:bg-darkBg-700 text-charcoal-800 dark:text-cream-100">8</span>
+          </div>
+          <span class="text-xs text-stone-400">Kliknij na zadanie, aby zmienić status</span>
+        </div>
+
+        <div class="space-y-3" id="full-tasks-container">
+          <!-- Dynamically populated in JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ================= VIEW 3: KALENDARZ (CALENDAR VIEW) ================= -->
+    <div id="view-calendar" class="tab-view hidden space-y-6">
+      
+      <!-- Calendar Header -->
+      <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-charcoal-900 dark:text-cream-100">Kalendarz Domowy</h1>
+          <p class="text-stone-500 dark:text-stone-400 text-sm mt-0.5">Wspólny harmonogram, dyżury i wydarzenia</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="flex items-center bg-white dark:bg-darkBg-800 rounded-xl p-1 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+            <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-cream-100 dark:hover:bg-darkBg-700 text-stone-600 dark:text-stone-300 transition">‹</button>
+            <span id="calendar-month-year" class="px-3 text-xs font-bold text-charcoal-900 dark:text-cream-100 min-w-[110px] text-center">Maj 2026</span>
+            <button onclick="changeMonth(1)" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-cream-100 dark:hover:bg-darkBg-700 text-stone-600 dark:text-stone-300 transition">›</button>
+          </div>
+          <button onclick="openAddEventModal()" class="px-4 py-2 rounded-xl bg-amberAccent-500 hover:bg-amberAccent-600 text-white text-xs font-semibold flex items-center gap-2 transition shadow-xs">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Dodaj wydarzenie
+          </button>
+        </div>
+      </header>
+
+      <!-- Calendar 2-column Layout: Month Grid + Day Schedule Details -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-7">
+
+        <!-- Left / Top: Interactive Calendar Grid (8 cols) -->
+        <div class="lg:col-span-8 bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-7 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+          <!-- Days of Week Header -->
+          <div class="grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs font-bold text-stone-400 mb-3">
+            <div>Pon</div>
+            <div>Wt</div>
+            <div>Śr</div>
+            <div>Czw</div>
+            <div>Pt</div>
+            <div>Sob</div>
+            <div>Niedz</div>
+          </div>
+
+          <!-- Calendar Days Grid -->
+          <div class="grid grid-cols-7 gap-1 sm:gap-2" id="calendar-days-grid">
+            <!-- Dynamically populated in JS -->
+          </div>
+        </div>
+
+        <!-- Right / Bottom: Selected Day Chores & Events (4 cols) -->
+        <div class="lg:col-span-4 space-y-6">
+          <div class="bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-7 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-stone-100 dark:border-darkBg-700">
+              <div>
+                <span class="text-xs text-stone-400 font-medium">Harmonogram na dzień</span>
+                <h3 id="selected-day-title" class="text-base font-bold text-charcoal-900 dark:text-cream-100">15 Maja 2026</h3>
+              </div>
+              <span id="selected-day-events-count" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-cream-200 dark:bg-darkBg-700 text-charcoal-800 dark:text-cream-100">
+                2 zadania
+              </span>
+            </div>
+
+            <!-- List of events on selected day -->
+            <div class="space-y-3" id="selected-day-events-list">
+              <!-- Dynamically populated in JS -->
+            </div>
+
+            <!-- Quick Add for Selected Day -->
+            <button onclick="openAddTaskForSelectedDay()" class="w-full mt-5 py-2.5 rounded-xl bg-cream-200 dark:bg-darkBg-700 hover:bg-cream-300 dark:hover:bg-darkBg-600 text-charcoal-800 dark:text-stone-200 text-xs font-semibold transition text-center block">
+              + Dodaj zadanie na ten dzień
+            </button>
+          </div>
+
+          <!-- Family Legend / Tips Card -->
+          <div class="bg-cream-100 dark:bg-darkBg-800/60 rounded-[24px] p-5 border border-stone-200/50 dark:border-darkBg-700">
+            <h4 class="text-xs font-bold text-charcoal-900 dark:text-cream-100 uppercase tracking-wider mb-2">Legenda domowników</h4>
+            <div class="grid grid-cols-2 gap-2 text-xs text-stone-600 dark:text-stone-300">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-sage-500"></span>
+                <span>Agnieszka</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amberAccent-500"></span>
+                <span>Marek</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-roseAccent-500"></span>
+                <span>Ania</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-sage-700"></span>
+                <span>Pies</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ================= VIEW 4: LISTA ZAKUPÓW (FULL SHOPPING VIEW) ================= -->
+    <div id="view-shopping" class="tab-view hidden space-y-6">
+      
+      <!-- Shopping Header -->
+      <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-charcoal-900 dark:text-cream-100">Lista Zakupów</h1>
+          <p class="text-stone-500 dark:text-stone-400 text-sm mt-0.5">Wspólna lista potrzebnych artykułów do domu</p>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <button onclick="copyShoppingListToClipboard()" class="px-3.5 py-2 rounded-xl border border-stone-200 dark:border-darkBg-700 text-stone-600 dark:text-stone-300 text-xs font-semibold hover:bg-cream-100 dark:hover:bg-darkBg-800 transition flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Kopiuj listę
+          </button>
+          <button onclick="clearCompletedShopping()" class="px-3.5 py-2 rounded-xl border border-stone-200 dark:border-darkBg-700 text-stone-600 dark:text-stone-300 text-xs font-semibold hover:bg-cream-100 dark:hover:bg-darkBg-800 transition">
+            Usuń kupione
+          </button>
+        </div>
+      </header>
+
+      <!-- Fast Add Bar -->
+      <div class="bg-white dark:bg-darkBg-800 rounded-[20px] p-4 sm:p-5 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+        <form onsubmit="handleFullShoppingSubmit(event)" class="flex flex-col sm:flex-row gap-3">
+          <input type="text" id="full-shopping-input" required placeholder="Co trzeba dokupić? (np. Pomidory, Kawa ziarnista)..." class="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 dark:border-darkBg-700 bg-cream-50 dark:bg-darkBg-900 text-charcoal-900 dark:text-cream-100 text-sm focus:outline-none focus:ring-2 focus:ring-skyAccent-500/30">
+          
+          <select id="full-shopping-category" class="px-3 py-2.5 rounded-xl border border-stone-200 dark:border-darkBg-700 bg-cream-50 dark:bg-darkBg-900 text-charcoal-800 dark:text-cream-100 text-xs font-medium focus:outline-none">
+            <option value="Warzywa i owoce">🥦 Warzywa i owoce</option>
+            <option value="Pieczywo">🥖 Pieczywo</option>
+            <option value="Nabiał">🥛 Nabiał i jajka</option>
+            <option value="Spiżarnia">🥫 Spiżarnia i przyprawy</option>
+            <option value="Chemia i dom">🧴 Chemia i dom</option>
+            <option value="Dla pupila">🐾 Dla pupila</option>
+          </select>
+
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-skyAccent-500 hover:bg-skyAccent-600 text-white text-xs font-semibold flex items-center justify-center gap-2 transition shadow-xs shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Dodaj do listy
+          </button>
+        </form>
+      </div>
+
+      <!-- Categories & Shopping Checklist -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="full-shopping-categories-container">
+        <!-- Dynamically populated in JS -->
+      </div>
+
+    </div>
+
+    <!-- ================= VIEW 5: USTAWIENIA (SETTINGS VIEW) ================= -->
+    <div id="view-settings" class="tab-view hidden space-y-7">
+      
+      <!-- Settings Header -->
+      <header>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-charcoal-900 dark:text-cream-100">Ustawienia</h1>
+        <p class="text-stone-500 dark:text-stone-400 text-sm mt-0.5">Dostosuj aplikację domową, członków rodziny i preferencje</p>
+      </header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-7">
+
+        <!-- Left Column: Domownicy & Profil (7 cols) -->
+        <div class="lg:col-span-7 space-y-7">
+
+          <!-- Card: Zarządzanie rodziną -->
+          <section class="bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-7 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+            <div class="flex items-center justify-between mb-5">
+              <div>
+                <h2 class="text-base font-bold text-charcoal-900 dark:text-cream-100">Członkowie rodziny</h2>
+                <span class="text-xs text-stone-400">Osoby uczestniczące w domowych obowiązkach</span>
+              </div>
+              <button onclick="openFamilyModal()" class="px-3.5 py-1.5 rounded-xl bg-cream-200 dark:bg-darkBg-700 hover:bg-cream-300 dark:hover:bg-darkBg-600 text-xs font-semibold text-charcoal-800 dark:text-stone-200 transition">
+                + Dodaj osobę
+              </button>
+            </div>
+
+            <div class="space-y-3" id="settings-family-list">
+              <!-- Dynamically populated in JS -->
+            </div>
+          </section>
+
+          <!-- Card: Motto i cytat domowy -->
+          <section class="bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-7 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+            <h2 class="text-base font-bold text-charcoal-900 dark:text-cream-100 mb-1">Motto domowe</h2>
+            <p class="text-xs text-stone-400 mb-4">Tekst wyświetlany u dołu bocznego menu</p>
+
+            <div class="space-y-3">
+              <div>
+                <input type="text" id="quote-input-1" value="Małe rzeczy" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 dark:border-darkBg-700 bg-cream-50 dark:bg-darkBg-900 text-sm font-handwriting text-lg text-charcoal-900 dark:text-cream-100 focus:outline-none focus:ring-2 focus:ring-amberAccent-500/30">
+              </div>
+              <div>
+                <input type="text" id="quote-input-2" value="tworzą wielki dom" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 dark:border-darkBg-700 bg-cream-50 dark:bg-darkBg-900 text-sm font-handwriting text-lg text-charcoal-900 dark:text-cream-100 focus:outline-none focus:ring-2 focus:ring-amberAccent-500/30">
+              </div>
+              <button onclick="saveCustomQuote()" class="px-4 py-2 rounded-xl bg-cream-200 dark:bg-darkBg-700 hover:bg-cream-300 text-charcoal-800 dark:text-stone-200 text-xs font-semibold transition">
+                Zapisz motto
+              </button>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Right Column: Wygląd, Powiadomienia i Dane (5 cols) -->
+        <div class="lg:col-span-5 space-y-7">
+
+          <!-- Card: Motyw i Wygląd -->
+          <section class="bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-7 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+            <h2 class="text-base font-bold text-charcoal-900 dark:text-cream-100 mb-1">Wygląd aplikacji</h2>
+            <p class="text-xs text-stone-400 mb-4">Dostosuj paletę barw i tryb wyświetlania</p>
+
+            <div class="grid grid-cols-2 gap-3">
+              <!-- Warm Cream / Light theme -->
+              <button onclick="setAppTheme('light')" id="theme-btn-light" class="p-3.5 rounded-2xl border-2 border-amberAccent-500 bg-cream-50 text-left transition flex flex-col justify-between">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="w-3.5 h-3.5 rounded-full bg-[#BD8E48]"></span>
+                  <span class="text-xs font-bold text-charcoal-900">Ciepły krem</span>
+                </div>
+                <span class="text-[11px] text-stone-500">Oryginalna ciepła paleta lnu</span>
+              </button>
+
+              <!-- Cozy Dark theme -->
+              <button onclick="setAppTheme('dark')" id="theme-btn-dark" class="p-3.5 rounded-2xl border-2 border-transparent hover:border-stone-300 dark:hover:border-darkBg-600 bg-stone-900 text-white text-left transition flex flex-col justify-between">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="w-3.5 h-3.5 rounded-full bg-stone-700"></span>
+                  <span class="text-xs font-bold text-white">Ciemny wieczór</span>
+                </div>
+                <span class="text-[11px] text-stone-400">Komfortowy tryb nocny</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- Card: Powiadomienia -->
+          <section class="bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-7 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+            <h2 class="text-base font-bold text-charcoal-900 dark:text-cream-100 mb-1">Powiadomienia domowe</h2>
+            <p class="text-xs text-stone-400 mb-4">Przypomnienia o dyżurach i zakupach</p>
+
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs font-semibold text-charcoal-900 dark:text-cream-100">Poranne podsumowanie (08:00)</p>
+                  <p class="text-[11px] text-stone-400">Przegląd zadań na dany dzień</p>
+                </div>
+                <input type="checkbox" checked class="w-4 h-4 accent-sage-500 rounded cursor-pointer" onchange="showToast('Zaktualizowano preferencje powiadomień')">
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs font-semibold text-charcoal-900 dark:text-cream-100">Przypomnienia o dyżurach</p>
+                  <p class="text-[11px] text-stone-400">15 minut przed zaplanowaną godziną</p>
+                </div>
+                <input type="checkbox" checked class="w-4 h-4 accent-sage-500 rounded cursor-pointer" onchange="showToast('Zaktualizowano preferencje powiadomień')">
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs font-semibold text-charcoal-900 dark:text-cream-100">Nowe pozycje na zakupach</p>
+                  <p class="text-[11px] text-stone-400">Gdy ktoś doda produkt do listy</p>
+                </div>
+                <input type="checkbox" checked class="w-4 h-4 accent-sage-500 rounded cursor-pointer" onchange="showToast('Zaktualizowano preferencje powiadomień')">
+              </div>
+            </div>
+          </section>
+
+          <!-- Card: GitHub Cloud Database & Sync -->
+          <section class="bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-7 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-full bg-charcoal-900 text-white flex items-center justify-center">
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="text-base font-bold text-charcoal-900 dark:text-cream-100">Baza w GitHub (Chmura)</h2>
+                  <span class="text-xs text-stone-400">Darmowa synchronizacja dla rodziny</span>
+                </div>
+              </div>
+              <span id="gh-settings-badge" class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-cream-200 dark:bg-darkBg-700 text-stone-500">
+                ⚪ Niepołączono
+              </span>
+            </div>
+
+            <div class="space-y-3.5">
+              <div>
+                <label class="block text-xs font-semibold text-stone-600 dark:text-stone-300 mb-1">
+                  Repozytorium GitHub (owner/repo)
+                </label>
+                <input type="text" id="gh-repo-input" placeholder="np. twoj-login/dom-dashboard" class="w-full px-3.5 py-2 rounded-xl border border-stone-200 dark:border-darkBg-700 bg-cream-50 dark:bg-darkBg-900 text-charcoal-900 dark:text-cream-100 text-xs focus:outline-none focus:ring-2 focus:ring-amberAccent-500/30">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-stone-600 dark:text-stone-300 mb-1">
+                  GitHub Personal Access Token (PAT)
+                </label>
+                <div class="relative">
+                  <input type="password" id="gh-token-input" placeholder="github_pat_... lub ghp_..." class="w-full pl-3.5 pr-10 py-2 rounded-xl border border-stone-200 dark:border-darkBg-700 bg-cream-50 dark:bg-darkBg-900 text-charcoal-900 dark:text-cream-100 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-amberAccent-500/30">
+                  <button type="button" onclick="toggleTokenVisibility()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-charcoal-800 text-xs cursor-pointer">
+                    👁
+                  </button>
+                </div>
+                <p class="text-[11px] text-stone-400 mt-1">
+                  Wymaga tylko uprawnienia: <code class="bg-cream-100 dark:bg-darkBg-700 px-1 rounded text-stone-600 dark:text-stone-300">Contents: Read and write</code>
+                </p>
+              </div>
+
+              <div class="pt-2 flex flex-col sm:flex-row gap-2">
+                <button onclick="saveAndTestGitHubConnection()" class="flex-1 py-2.5 rounded-xl bg-charcoal-900 hover:bg-black text-white text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer shadow-xs">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                  Zapisz i połącz
+                </button>
+                <button onclick="fetchFromGitHub(true)" class="py-2.5 px-4 rounded-xl border border-stone-200 dark:border-darkBg-700 text-stone-700 dark:text-stone-300 text-xs font-semibold hover:bg-cream-100 dark:hover:bg-darkBg-700 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                  Pobierz teraz
+                </button>
+              </div>
+
+              <div class="pt-3 border-t border-stone-100 dark:border-darkBg-700">
+                <button onclick="generateFamilyShareLink()" class="w-full py-2.5 rounded-xl bg-cream-200 dark:bg-darkBg-700 hover:bg-cream-300 text-charcoal-800 dark:text-stone-200 text-xs font-semibold transition flex items-center justify-center gap-2 cursor-pointer">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                  🔗 Wygeneruj link dla rodziny
+                </button>
+                <p class="text-[11px] text-stone-400 text-center mt-1.5">
+                  Pozostali domownicy otwierają link na telefonie i od razu są połączeni bez wpisywania tokenów!
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Card: Dane i reset -->
+          <section class="bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-7 shadow-card border border-stone-200/40 dark:border-darkBg-700">
+            <h2 class="text-base font-bold text-charcoal-900 dark:text-cream-100 mb-1">Pamięć i reset</h2>
+            <p class="text-xs text-stone-400 mb-4">Wszystkie Twoje zmiany są automatycznie zapisywane lokalnie</p>
+
+            <div class="flex flex-col gap-2.5">
+              <button onclick="exportDataJSON()" class="w-full py-2.5 rounded-xl border border-stone-200 dark:border-darkBg-700 text-stone-700 dark:text-stone-300 text-xs font-semibold hover:bg-cream-100 dark:hover:bg-darkBg-700 transition">
+                Eksportuj dane do pliku JSON
+              </button>
+              <button onclick="resetToInitialDefaults()" class="w-full py-2.5 rounded-xl border border-roseAccent-200 dark:border-roseAccent-900 text-roseAccent-600 dark:text-roseAccent-400 text-xs font-semibold hover:bg-roseAccent-50 dark:hover:bg-roseAccent-900/20 transition">
+                Przywróć stan początkowy (screenshot)
+              </button>
+            </div>
+          </section>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ================= MOBILE STICKY BOTTOM NAVIGATION BAR ================= -->
+  <div class="md:hidden fixed bottom-0 inset-x-0 bg-white/95 dark:bg-darkBg-900/95 backdrop-blur-md border-t border-stone-200/60 dark:border-darkBg-700 px-3 py-2 flex items-center justify-around z-40 shadow-lg">
+    <button onclick="switchTab('home')" data-tab="home" class="mobile-bottom-nav-item flex flex-col items-center gap-1 text-charcoal-900 dark:text-cream-100 py-1 px-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span class="text-[10px] font-semibold">Główna</span>
+    </button>
+    <button onclick="switchTab('tasks')" data-tab="tasks" class="mobile-bottom-nav-item flex flex-col items-center gap-1 text-stone-500 dark:text-stone-400 py-1 px-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span class="text-[10px] font-medium">Zadania</span>
+    </button>
+    <button onclick="switchTab('calendar')" data-tab="calendar" class="mobile-bottom-nav-item flex flex-col items-center gap-1 text-stone-500 dark:text-stone-400 py-1 px-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span class="text-[10px] font-medium">Kalendarz</span>
+    </button>
+    <button onclick="switchTab('shopping')" data-tab="shopping" class="mobile-bottom-nav-item flex flex-col items-center gap-1 text-stone-500 dark:text-stone-400 py-1 px-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+      <span class="text-[10px] font-medium">Zakupy</span>
+    </button>
+    <button onclick="switchTab('settings')" data-tab="settings" class="mobile-bottom-nav-item flex flex-col items-center gap-1 text-stone-500 dark:text-stone-400 py-1 px-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="text-[10px] font-medium">Opcje</span>
+    </button>
+  </div>
+
+  <!-- ================= MODAL: DODAJ ZADANIE ================= -->
+  <div id="add-task-modal" class="fixed inset-0 bg-charcoal-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-white dark:bg-darkBg-800 rounded-[24px] max-w-md w-full p-6 sm:p-7 shadow-modal transform scale-95 transition-transform duration-200" id="modal-box">
+      <div class="flex items-center justify-between mb-5">
+        <h3 class="text-lg font-bold text-charcoal-900 dark:text-cream-100">Dodaj nowe zadanie</h3>
+        <button onclick="closeAddTaskModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-stone-400 hover:text-charcoal-900 dark:hover:text-cream-100 hover:bg-cream-100 dark:hover:bg-darkBg-700 transition">
+          ✕
+        </button>
+      </div>
+
+      <form id="add-task-form" onsubmit="handleAddTaskSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-stone-600 dark:text-stone-300 mb-1.5">Nazwa zadania</label>
+          <input type="text" id="task-name" required placeholder="np. Podlewanie kwiatów, Mycie okien..." class="w-full px-4 py-2.5 rounded-xl border border-stone-200 dark:border-darkBg-700 bg-cream-50 dark:bg-darkBg-900 text-charcoal-900 dark:text-cream-100 text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/40">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-stone-600 dark:text-stone-300 mb-1.5">Kto realizuje?</label>
+          <div class="grid grid-cols-4 gap-2" id="modal-assignee-radios">
+            <!-- Dynamically populated or rendered -->
+            <label class="cursor-pointer">
+              <input type="radio" name="assignee" value="Agnieszka" checked class="peer sr-only">
+              <div class="p-2 rounded-xl border border-stone-200 dark:border-darkBg-700 flex flex-col items-center peer-checked:border-sage-500 peer-checked:bg-sage-50 dark:peer-checked:bg-sage-900/30 peer-checked:text-sage-700 dark:peer-checked:text-sage-300 transition">
+                <img src="assets/avatar-agnieszka.png" class="w-7 h-7 rounded-full object-cover mb-1">
+                <span class="text-[11px] font-medium">Agnieszka</span>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="assignee" value="Marek" class="peer sr-only">
+              <div class="p-2 rounded-xl border border-stone-200 dark:border-darkBg-700 flex flex-col items-center peer-checked:border-amberAccent-500 peer-checked:bg-amberAccent-50 dark:peer-checked:bg-amberAccent-900/30 peer-checked:text-amberAccent-600 transition">
+                <img src="assets/avatar-marek.png" class="w-7 h-7 rounded-full object-cover mb-1">
+                <span class="text-[11px] font-medium">Marek</span>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="assignee" value="Ania" class="peer sr-only">
+              <div class="p-2 rounded-xl border border-stone-200 dark:border-darkBg-700 flex flex-col items-center peer-checked:border-roseAccent-500 peer-checked:bg-roseAccent-50 dark:peer-checked:bg-roseAccent-900/30 peer-checked:text-roseAccent-600 transition">
+                <img src="assets/avatar-ania.png" class="w-7 h-7 rounded-full object-cover mb-1">
+                <span class="text-[11px] font-medium">Ania</span>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="assignee" value="Pies" class="peer sr-only">
+              <div class="p-2 rounded-xl border border-stone-200 dark:border-darkBg-700 flex flex-col items-center peer-checked:border-sage-700 peer-checked:bg-sage-50 dark:peer-checked:bg-sage-900/30 peer-checked:text-sage-700 transition">
+                <img src="assets/avatar-pies.png" class="w-7 h-7 rounded-full object-cover mb-1">
+                <span class="text-[11px] font-medium">Pies</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-stone-600 dark:text-stone-300 mb-1.5">Godzina</label>
+            <input type="time" id="task-time" value="15:00" required class="w-full px-4 py-2 rounded-xl border border-stone-200 dark:border-darkBg-700 bg-cream-50 dark:bg-darkBg-900 text-charcoal-900 dark:text-cream-100 text-sm focus:outline-none focus:ring-2 focus:ring-sage-500/40 font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-stone-600 dark:text-stone-300 mb-1.5">Dzień tygodnia</label>
+            <select id="task-day-select" class="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-darkBg-700 bg-cream-50 dark:bg-darkBg-900 text-charcoal-900 dark:text-cream-100 text-sm focus:outline-none">
+              <option value="today">Dziś (wtorek)</option>
+              <option value="Pon 12">Poniedziałek 12</option>
+              <option value="Wt 13">Wtorek 13</option>
+              <option value="Śr 14">Środa 14</option>
+              <option value="Czw 15">Czwartek 15</option>
+              <option value="Pt 16">Piątek 16</option>
+              <option value="Sob 17">Sobota 17</option>
+              <option value="Niedz 18">Niedziela 18</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-3 flex gap-3">
+          <button type="button" onclick="closeAddTaskModal()" class="flex-1 py-2.5 rounded-xl border border-stone-200 dark:border-darkBg-700 text-stone-600 dark:text-stone-300 text-xs font-semibold hover:bg-cream-100 dark:hover:bg-darkBg-700 transition">
+            Anuluj
+          </button>
+          <button type="submit" class="flex-1 py-2.5 rounded-xl bg-sage-500 hover:bg-sage-600 text-white text-xs font-semibold transition shadow-xs">
+            Dodaj zadanie
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: RODZINA (MANAGE FAMILY) ================= -->
+  <div id="family-modal" class="fixed inset-0 bg-charcoal-900/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-white dark:bg-darkBg-800 rounded-[24px] max-w-sm w-full p-6 sm:p-7 shadow-modal" id="family-modal-box">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-base font-bold text-charcoal-900 dark:text-cream-100">Członkowie rodziny</h3>
+        <button onclick="closeFamilyModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-stone-400 hover:text-charcoal-900 dark:hover:text-cream-100 hover:bg-cream-100 dark:hover:bg-darkBg-700 transition">
+          ✕
+        </button>
+      </div>
+
+      <div class="space-y-3 mb-5" id="family-modal-list">
+        <!-- Rendered in JS -->
+      </div>
+
+      <div class="space-y-2">
+        <button onclick="promptAddNewMember()" class="w-full py-2.5 rounded-xl bg-cream-200 dark:bg-darkBg-700 hover:bg-cream-300 text-charcoal-800 dark:text-stone-200 text-xs font-semibold transition">
+          + Dodaj nowego członka rodziny
+        </button>
+        <button onclick="copyInviteLink()" class="w-full py-2 rounded-xl text-stone-500 hover:text-charcoal-900 dark:hover:text-cream-100 text-xs font-medium transition text-center">
+          Kopiuj link z zaproszeniem
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOAST NOTIFICATION ================= -->
+  <div id="toast" class="fixed bottom-16 md:bottom-6 right-4 sm:right-6 bg-charcoal-900 text-white px-4 py-2.5 rounded-xl shadow-xl text-xs font-medium flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50 pointer-events-none">
+    <span id="toast-text">Powiadomienie</span>
+  </div>
+
+  <!-- ================= JAVASCRIPT STATE & APPLICATION LOGIC ================= -->
+  <script>
+    // Initial State strictly reflecting the screenshot data
+    const INITIAL_TASKS = [
+      { id: 1, text: "Wyprowadź psa", assignee: "Marek", time: "08:00", completed: true, day: "today" },
+      { id: 2, text: "Zmywanie naczyń", assignee: "Agnieszka", time: "12:00", completed: true, day: "today" },
+      { id: 3, text: "Wyniesienie śmieci", assignee: "Ania", time: "14:00", completed: true, day: "today" },
+      { id: 4, text: "Pranie", assignee: "Agnieszka", time: "16:00", completed: false, day: "today" },
+      { id: 5, text: "Odkurzanie salonu", assignee: "Marek", time: "17:00", completed: false, day: "today" },
+      { id: 6, text: "Podlewanie kwiatów", assignee: "Ania", time: "18:00", completed: false, day: "today" },
+      { id: 7, text: "Przygotowanie kolacji", assignee: "Marek", time: "19:00", completed: false, day: "today" },
+      { id: 8, text: "Składanie ubrań", assignee: "Agnieszka", time: "20:00", completed: false, day: "today" },
+    ];
+
+    const INITIAL_SHOPPING = [
+      { id: 1, text: "Mleko", category: "Nabiał", completed: false },
+      { id: 2, text: "Chleb", category: "Pieczywo", completed: false },
+      { id: 3, text: "Jajka", category: "Nabiał", completed: false },
+      { id: 4, text: "Pomidory", category: "Warzywa i owoce", completed: false },
+      { id: 5, text: "Szpinak", category: "Warzywa i owoce", completed: false },
+    ];
+
+    const INITIAL_FAMILY = [
+      { id: "agnieszka", name: "Agnieszka", role: "Mama", avatar: "assets/avatar-agnieszka.png", initialDone: 11, target: 14, color: "#5E8250" },
+      { id: "marek", name: "Marek", role: "Tata", avatar: "assets/avatar-marek.png", initialDone: 9, target: 14, color: "#BD8E48" },
+      { id: "ania", name: "Ania", role: "Córka", avatar: "assets/avatar-ania.png", initialDone: 8, target: 14, color: "#E08484" },
+      { id: "pies", name: "Pies", role: "Najlepszy przyjaciel", avatar: "assets/avatar-pies.png", initialDone: 14, target: 14, color: "#3D5933" },
+    ];
+
+    const WEEK_DAYS_DATA = [
+      { day: "Pon", date: 12, dots: ["#5E8250", "#BD8E48", "#E08484", "#D5CCC0", "#55789A"], done: 5, total: 8 },
+      { day: "Wt", date: 13, dots: ["#5E8250", "#BD8E48", "#E08484", "#D5CCC0", "#55789A", "#5E8250"], done: 6, total: 8, isToday: true },
+      { day: "Śr", date: 14, dots: ["#5E8250", "#BD8E48", "#E08484", "#D5CCC0"], done: 4, total: 8 },
+      { day: "Czw", date: 15, dots: ["#5E8250", "#BD8E48", "#E08484", "#D5CCC0", "#55789A", "#5E8250", "#BD8E48"], done: 7, total: 8 },
+      { day: "Pt", date: 16, dots: ["#5E8250", "#BD8E48", "#E08484", "#D5CCC0", "#55789A"], done: 5, total: 8 },
+      { day: "Sob", date: 17, dots: ["#5E8250", "#BD8E48", "#E08484", "#D5CCC0", "#55789A", "#5E8250"], done: 6, total: 8 },
+      { day: "Niedz", date: 18, dots: ["#BD8E48", "#E08484", "#D5CCC0"], done: 3, total: 6 },
+    ];
+
+    // Calendar events
+    const INITIAL_EVENTS = [
+      { day: 12, title: "Wywóz śmieci (bio i plastik)", time: "07:00", person: "Marek" },
+      { day: 13, title: "Trening Ani", time: "16:30", person: "Ania" },
+      { day: 15, title: "Wizyta weterynarza z Psem", time: "11:00", person: "Agnieszka" },
+      { day: 15, title: "Duże zakupy na weekend", time: "18:00", person: "Marek" },
+      { day: 17, title: "Rodzinny spacer do lasu", time: "14:00", person: "Wszyscy" },
+      { day: 22, title: "Urodziny Babci Krystyny 🎉", time: "16:00", person: "Wszyscy" },
+      { day: 26, title: "Przegląd pieca gazowego", time: "09:00", person: "Marek" }
+    ];
+
+    // Load from LocalStorage or initialize
+    let tasks = JSON.parse(localStorage.getItem('dom_tasks')) || INITIAL_TASKS;
+    let shoppingItems = JSON.parse(localStorage.getItem('dom_shopping')) || INITIAL_SHOPPING;
+    let familyMembers = JSON.parse(localStorage.getItem('dom_family')) || INITIAL_FAMILY;
+    let calendarEvents = JSON.parse(localStorage.getItem('dom_events')) || INITIAL_EVENTS;
+    let appTheme = localStorage.getItem('dom_theme') || 'light';
+    let quotePart1 = localStorage.getItem('dom_quote1') || 'Małe rzeczy';
+    let quotePart2 = localStorage.getItem('dom_quote2') || 'tworzą wielki dom';
+
+    let currentTab = 'home';
+    let currentTaskFilter = 'all';
+    let selectedCalendarDay = 15;
+    let calendarMonthOffset = 0; // 0 = May 2026
+
+    // GitHub Cloud Database Configuration
+    let ghRepo = localStorage.getItem('dom_gh_repo') || '';
+    let ghToken = localStorage.getItem('dom_gh_token') || '';
+    let ghPath = localStorage.getItem('dom_gh_path') || 'dom-data.json';
+    let ghBranch = localStorage.getItem('dom_gh_branch') || 'main';
+    let ghSha = localStorage.getItem('dom_gh_sha') || '';
+
+    function saveState(shouldSyncToGitHub = true) {
+      localStorage.setItem('dom_tasks', JSON.stringify(tasks));
+      localStorage.setItem('dom_shopping', JSON.stringify(shoppingItems));
+      localStorage.setItem('dom_family', JSON.stringify(familyMembers));
+      localStorage.setItem('dom_events', JSON.stringify(calendarEvents));
+      localStorage.setItem('dom_theme', appTheme);
+      localStorage.setItem('dom_quote1', quotePart1);
+      localStorage.setItem('dom_quote2', quotePart2);
+
+      if (shouldSyncToGitHub && ghRepo && ghToken) {
+        debouncedPushToGitHub();
+      }
+    }
+
+    // ================= TAB NAVIGATION =================
+    function switchTab(tabId) {
+      currentTab = tabId;
+
+      // Hide all tabs
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+
+      // Show target tab
+      const target = document.getElementById(`view-${tabId}`);
+      if (target) {
+        target.classList.remove('hidden');
+      }
+
+      // Update sidebar active states
+      document.querySelectorAll('#sidebar-nav .sidebar-nav-item, #mobile-sidebar-nav .mobile-nav-item').forEach(btn => {
+        const matches = btn.getAttribute('data-tab') === tabId;
+        if (matches) {
+          btn.classList.add('bg-cream-200', 'dark:bg-darkBg-700', 'font-semibold');
+          btn.classList.remove('font-medium', 'text-stone-600', 'dark:text-stone-400');
+        } else {
+          btn.classList.remove('bg-cream-200', 'dark:bg-darkBg-700', 'font-semibold');
+          btn.classList.add('font-medium', 'text-stone-600', 'dark:text-stone-400');
+        }
+      });
+
+      // Update mobile bottom nav
+      document.querySelectorAll('.mobile-bottom-nav-item').forEach(btn => {
+        const matches = btn.getAttribute('data-tab') === tabId;
+        if (matches) {
+          btn.classList.add('text-charcoal-900', 'dark:text-cream-100', 'font-semibold');
+          btn.classList.remove('text-stone-500', 'dark:text-stone-400', 'font-medium');
+        } else {
+          btn.classList.remove('text-charcoal-900', 'dark:text-cream-100', 'font-semibold');
+          btn.classList.add('text-stone-500', 'dark:text-stone-400', 'font-medium');
+        }
+      });
+
+      // Update mobile badge text
+      const titles = {
+        'home': 'Strona główna',
+        'tasks': 'Zadania',
+        'calendar': 'Kalendarz',
+        'shopping': 'Lista zakupów',
+        'settings': 'Ustawienia'
+      };
+      document.getElementById('mobile-tab-badge').innerText = titles[tabId] || 'Dom';
+
+      // Re-render appropriate view
+      if (tabId === 'home') renderDashboard();
+      if (tabId === 'tasks') renderFullTasksView();
+      if (tabId === 'calendar') renderCalendar();
+      if (tabId === 'shopping') renderFullShoppingView();
+      if (tabId === 'settings') renderSettingsView();
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ================= MOBILE DRAWER TOGGLE =================
+    function toggleMobileDrawer() {
+      const drawer = document.getElementById('mobile-drawer');
+      const backdrop = document.getElementById('drawer-backdrop');
+      const panel = document.getElementById('drawer-panel');
+
+      if (drawer.classList.contains('hidden')) {
+        drawer.classList.remove('hidden');
+        setTimeout(() => {
+          backdrop.classList.remove('opacity-0');
+          panel.classList.remove('-translate-x-full');
+        }, 10);
+      } else {
+        backdrop.classList.add('opacity-0');
+        panel.classList.add('-translate-x-full');
+        setTimeout(() => {
+          drawer.classList.add('hidden');
+        }, 300);
+      }
+    }
+
+    // ================= DASHBOARD RENDERING =================
+    function renderDashboard() {
+      // 1. Render Dashboard Task list
+      const container = document.getElementById('task-list');
+      container.innerHTML = '';
+
+      tasks.forEach(task => {
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between py-1.5 px-2 -mx-2 rounded-xl hover:bg-cream-50 dark:hover:bg-darkBg-700/50 transition-colors group cursor-pointer";
+        row.onclick = () => toggleTask(task.id);
+
+        const member = familyMembers.find(m => m.name.toLowerCase() === task.assignee.toLowerCase()) || familyMembers[0];
+
+        row.innerHTML = `
+          <div class="flex items-center gap-3.5 flex-1 min-w-0 pr-2">
+            <button type="button" class="shrink-0 transition-transform active:scale-90" aria-label="Status zadania">
+              ${task.completed ? `
+                <div class="w-5 h-5 rounded-full bg-sage-500 text-white flex items-center justify-center shadow-xs">
+                  <svg class="w-3 h-3 stroke-current" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </div>
+              ` : `
+                <div class="w-5 h-5 rounded-full border-[1.8px] border-stone-300 dark:border-darkBg-600 group-hover:border-sage-500 transition-colors bg-white dark:bg-darkBg-900"></div>
+              `}
+            </button>
+
+            <span class="text-xs transition-all ${task.completed ? 'line-through text-stone-400 font-normal' : 'text-charcoal-900 dark:text-cream-100 font-medium'} truncate">
+              ${task.text}
+            </span>
+          </div>
+
+          <div class="flex items-center gap-3 shrink-0">
+            <div class="flex items-center gap-1.5">
+              <img src="${member.avatar}" alt="${task.assignee}" class="w-5 h-5 rounded-full object-cover">
+              <span class="text-xs text-stone-500 dark:text-stone-400 font-normal">${task.assignee}</span>
+            </div>
+            <span class="text-xs text-stone-400 tabular-nums w-11 text-right font-normal">${task.time}</span>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      // 2. Render Shopping mini-list
+      const shopContainer = document.getElementById('shopping-list');
+      shopContainer.innerHTML = '';
+
+      shoppingItems.slice(0, 5).forEach(item => {
+        const row = document.createElement('div');
+        row.className = "flex items-center gap-3 py-1 cursor-pointer group";
+        row.onclick = () => toggleShoppingItem(item.id);
+
+        row.innerHTML = `
+          <button type="button" class="shrink-0 transition-transform active:scale-90">
+            ${item.completed ? `
+              <div class="w-4 h-4 rounded-full bg-skyAccent-500 text-white flex items-center justify-center">
+                <svg class="w-2.5 h-2.5 stroke-current" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+            ` : `
+              <div class="w-4 h-4 rounded-full border border-stone-300 dark:border-darkBg-600 group-hover:border-skyAccent-500 transition-colors bg-white dark:bg-darkBg-900"></div>
+            `}
+          </button>
+          <span class="text-xs ${item.completed ? 'line-through text-stone-400' : 'text-charcoal-800 dark:text-cream-100 font-normal'}">
+            ${item.text}
+          </span>
+        `;
+        shopContainer.appendChild(row);
+      });
+
+      // 3. Render Week Days list
+      const weekContainer = document.getElementById('week-days-list');
+      weekContainer.innerHTML = '';
+
+      WEEK_DAYS_DATA.forEach(day => {
+        const row = document.createElement('div');
+        row.className = `flex items-center justify-between py-1 px-2 -mx-2 rounded-xl transition-colors cursor-pointer group ${day.isToday ? 'bg-cream-100/70 dark:bg-darkBg-700/60 font-medium' : 'hover:bg-cream-50 dark:hover:bg-darkBg-700/40'}`;
+        row.onclick = () => {
+          selectedCalendarDay = day.date;
+          switchTab('calendar');
+        };
+
+        const dotsHtml = day.dots.map(color => `<span class="w-2 h-2 rounded-full" style="background-color: ${color}"></span>`).join('');
+
+        row.innerHTML = `
+          <div class="w-16 flex items-baseline gap-2">
+            <span class="text-xs font-semibold ${day.isToday ? 'text-sage-600 dark:text-sage-400' : 'text-charcoal-900 dark:text-cream-100'}">${day.day}</span>
+            <span class="text-xs text-stone-400 font-medium">${day.date}</span>
+          </div>
+          <div class="flex items-center gap-1.5 flex-1 px-3">
+            ${dotsHtml}
+          </div>
+          <div class="flex items-center gap-2 text-xs font-medium text-stone-600 dark:text-stone-300">
+            <span>${day.done}/${day.total}</span>
+            <svg class="w-3.5 h-3.5 text-stone-400 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7"/>
+            </svg>
+          </div>
+        `;
+        weekContainer.appendChild(row);
+      });
+
+      // 4. Render Family Gauges
+      renderFamilyGauges();
+
+      // 5. Update KPI Counters & Progress Bars
+      updateDashboardStats();
+    }
+
+    function renderFamilyGauges() {
+      const container = document.getElementById('family-gauges-container');
+      container.innerHTML = '';
+
+      familyMembers.forEach(member => {
+        // Calculate done tasks count for member
+        const memberTasks = tasks.filter(t => t.assignee.toLowerCase() === member.name.toLowerCase());
+        const completedCount = memberTasks.filter(t => t.completed).length;
+        const totalMemberTasks = memberTasks.length;
+
+        // Combine with baseline weekly chores
+        const currentDone = member.initialDone + (completedCount - (memberTasks.length > 0 ? 1 : 0));
+        const effectiveDone = Math.max(0, Math.min(member.target, currentDone));
+        const percent = Math.round((effectiveDone / member.target) * 100);
+
+        const circumference = 125.66;
+        const offset = circumference - (circumference * percent / 100);
+
+        const col = document.createElement('div');
+        col.className = "flex flex-col items-center";
+
+        col.innerHTML = `
+          <div class="relative p-0.5 rounded-full ring-2 mb-2" style="ring-color: ${member.color}80">
+            <img src="${member.avatar}" alt="${member.name}" class="w-12 h-12 rounded-full object-cover">
+          </div>
+          <span class="text-xs font-semibold text-charcoal-800 dark:text-cream-100 block">${member.name}</span>
+          
+          <div class="relative w-14 h-14 my-2 flex items-center justify-center">
+            <svg class="w-full h-full gauge-circle" viewBox="0 0 50 50">
+              <circle cx="25" cy="25" r="20" fill="none" stroke="#EDE7DE" stroke-width="4.5" class="dark:stroke-darkBg-700" />
+              <circle cx="25" cy="25" r="20" fill="none" stroke="${member.color}" stroke-width="4.5" stroke-dasharray="125.66" stroke-dashoffset="${offset}" stroke-linecap="round" />
+            </svg>
+            <span class="absolute text-[13px] font-bold text-charcoal-900 dark:text-cream-100">${percent}%</span>
+          </div>
+          <span class="text-[11px] text-stone-400 font-medium">${effectiveDone} / ${member.target}</span>
+        `;
+        container.appendChild(col);
+      });
+    }
+
+    function updateDashboardStats() {
+      const total = tasks.length;
+      const done = tasks.filter(t => t.completed).length;
+
+      document.getElementById('tasks-done-count').innerText = done;
+      document.getElementById('tasks-total-count').innerText = total;
+
+      document.getElementById('top-today-done').innerText = done;
+      document.getElementById('top-today-total').innerText = total;
+
+      const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+      document.getElementById('top-today-bar').style.width = `${percent}%`;
+
+      // Shopping counts
+      const activeShopping = shoppingItems.filter(i => !i.completed).length;
+      document.getElementById('shopping-count-label').innerText = `${activeShopping} pozycji`;
+      document.getElementById('top-shopping-count').innerText = activeShopping;
+      document.getElementById('nav-badge-shopping').innerText = activeShopping;
+
+      // Pending tasks badge
+      const pendingTasks = total - done;
+      document.getElementById('nav-badge-tasks').innerText = pendingTasks;
+    }
+
+    // Toggle Task status
+    function toggleTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        task.completed = !task.completed;
+        saveState();
+        renderDashboard();
+        if (currentTab === 'tasks') renderFullTasksView();
+        showToast(task.completed ? `Ukończono: "${task.text}" 🎉` : `Przywrócono: "${task.text}"`);
+      }
+    }
+
+    // Toggle Shopping Item
+    function toggleShoppingItem(id) {
+      const item = shoppingItems.find(i => i.id === id);
+      if (item) {
+        item.completed = !item.completed;
+        saveState();
+        renderDashboard();
+        if (currentTab === 'shopping') renderFullShoppingView();
+      }
+    }
+
+    // ================= FULL TASKS VIEW =================
+    function setTaskFilter(filter) {
+      currentTaskFilter = filter;
+      document.querySelectorAll('.task-filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-filter') === filter) {
+          btn.classList.add('bg-cream-200', 'dark:bg-darkBg-700', 'font-semibold');
+          btn.classList.remove('font-medium', 'text-stone-600', 'dark:text-stone-400');
+        } else {
+          btn.classList.remove('bg-cream-200', 'dark:bg-darkBg-700', 'font-semibold');
+          btn.classList.add('font-medium', 'text-stone-600', 'dark:text-stone-400');
+        }
+      });
+      renderFullTasksView();
+    }
+
+    function renderFullTasksView() {
+      const container = document.getElementById('full-tasks-container');
+      const searchQuery = (document.getElementById('tasks-search-input')?.value || '').toLowerCase();
+      const assigneeFilter = document.getElementById('tasks-assignee-filter')?.value || 'all';
+
+      let filtered = tasks.filter(t => {
+        if (searchQuery && !t.text.toLowerCase().includes(searchQuery)) return false;
+        if (assigneeFilter !== 'all' && t.assignee.toLowerCase() !== assigneeFilter.toLowerCase()) return false;
+        if (currentTaskFilter === 'pending' && t.completed) return false;
+        if (currentTaskFilter === 'completed' && !t.completed) return false;
+        return true;
+      });
+
+      document.getElementById('full-tasks-badge').innerText = filtered.length;
+      container.innerHTML = '';
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="py-12 text-center text-stone-400">
+            <svg class="w-10 h-10 mx-auto mb-2 text-stone-300 stroke-current" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            <p class="text-sm font-medium">Brak zadań w wybranym filtrze</p>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(task => {
+        const item = document.createElement('div');
+        item.className = "flex items-center justify-between p-3 rounded-2xl border border-stone-100 dark:border-darkBg-700/60 hover:bg-cream-50 dark:hover:bg-darkBg-700/40 transition group";
+
+        const member = familyMembers.find(m => m.name.toLowerCase() === task.assignee.toLowerCase()) || familyMembers[0];
+
+        item.innerHTML = `
+          <div class="flex items-center gap-3.5 flex-1 min-w-0 pr-3 cursor-pointer" onclick="toggleTask(${task.id})">
+            <button type="button" class="shrink-0 transition-transform active:scale-90">
+              ${task.completed ? `
+                <div class="w-5 h-5 rounded-full bg-sage-500 text-white flex items-center justify-center">
+                  <svg class="w-3 h-3 stroke-current" fill="none" stroke-width="2.6" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+              ` : `
+                <div class="w-5 h-5 rounded-full border-[1.8px] border-stone-300 dark:border-darkBg-600 group-hover:border-sage-500 transition-colors bg-white dark:bg-darkBg-900"></div>
+              `}
+            </button>
+            <div class="min-w-0">
+              <p class="text-xs sm:text-sm ${task.completed ? 'line-through text-stone-400' : 'text-charcoal-900 dark:text-cream-100 font-medium'} truncate">
+                ${task.text}
+              </p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[11px] text-stone-400 font-mono">⏰ ${task.time}</span>
+                <span class="text-[11px] px-2 py-0.2 rounded-md bg-cream-100 dark:bg-darkBg-700 text-stone-500 dark:text-stone-400">${task.day || 'dziś'}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 shrink-0">
+            <div class="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-cream-100 dark:bg-darkBg-700/80">
+              <img src="${member.avatar}" class="w-5 h-5 rounded-full object-cover">
+              <span class="text-xs font-medium text-charcoal-800 dark:text-stone-300 hidden sm:inline">${task.assignee}</span>
+            </div>
+            <button onclick="deleteTask(${task.id})" class="text-stone-400 hover:text-roseAccent-600 p-1 rounded-lg transition" title="Usuń zadanie">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      saveState();
+      renderFullTasksView();
+      renderDashboard();
+      showToast('Zadanie zostało usunięte');
+    }
+
+    function clearCompletedTasks() {
+      const beforeCount = tasks.length;
+      tasks = tasks.filter(t => !t.completed);
+      saveState();
+      renderFullTasksView();
+      renderDashboard();
+      showToast(`Usunięto ${beforeCount - tasks.length} ukończonych zadań`);
+    }
+
+    // ================= FULL SHOPPING VIEW =================
+    function renderFullShoppingView() {
+      const container = document.getElementById('full-shopping-categories-container');
+      container.innerHTML = '';
+
+      const categories = [
+        { name: "Warzywa i owoce", icon: "🥦" },
+        { name: "Pieczywo", icon: "🥖" },
+        { name: "Nabiał", icon: "🥛" },
+        { name: "Spiżarnia", icon: "🥫" },
+        { name: "Chemia i dom", icon: "🧴" },
+        { name: "Dla pupila", icon: "🐾" },
+      ];
+
+      categories.forEach(cat => {
+        const catItems = shoppingItems.filter(i => (i.category || 'Spiżarnia').toLowerCase() === cat.name.toLowerCase());
+        
+        const card = document.createElement('div');
+        card.className = "bg-white dark:bg-darkBg-800 rounded-[24px] p-5 sm:p-6 shadow-card border border-stone-200/40 dark:border-darkBg-700 flex flex-col justify-between";
+
+        let itemsHtml = '';
+        if (catItems.length === 0) {
+          itemsHtml = `<p class="text-xs text-stone-400 py-3 italic">Wszystko kupione w tej kategorii ✨</p>`;
+        } else {
+          itemsHtml = catItems.map(item => `
+            <div class="flex items-center justify-between py-2 border-b border-stone-100 dark:border-darkBg-700/50 last:border-0 group cursor-pointer" onclick="toggleShoppingItem(${item.id})">
+              <div class="flex items-center gap-3">
+                <button type="button" class="shrink-0 transition-transform active:scale-90">
+                  ${item.completed ? `
+                    <div class="w-4 h-4 rounded-full bg-skyAccent-500 text-white flex items-center justify-center">
+                      <svg class="w-2.5 h-2.5 stroke-current" fill="none" stroke-width="2.6" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                  ` : `
+                    <div class="w-4 h-4 rounded-full border border-stone-300 dark:border-darkBg-600 group-hover:border-skyAccent-500 bg-white dark:bg-darkBg-900"></div>
+                  `}
+                </button>
+                <span class="text-xs sm:text-sm ${item.completed ? 'line-through text-stone-400' : 'text-charcoal-900 dark:text-cream-100 font-medium'}">
+                  ${item.text}
+                </span>
+              </div>
+              <button onclick="event.stopPropagation(); deleteShoppingItem(${item.id})" class="text-stone-300 hover:text-roseAccent-600 transition p-1" title="Usuń produkt">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          `).join('');
+        }
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between pb-3 mb-2 border-b border-stone-100 dark:border-darkBg-700">
+              <div class="flex items-center gap-2">
+                <span class="text-base">${cat.icon}</span>
+                <h3 class="text-sm font-bold text-charcoal-900 dark:text-cream-100">${cat.name}</h3>
+              </div>
+              <span class="text-xs text-stone-400 font-medium">${catItems.filter(i=>!i.completed).length} do kupienia</span>
+            </div>
+            <div class="space-y-1">
+              ${itemsHtml}
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function handleFullShoppingSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('full-shopping-input');
+      const category = document.getElementById('full-shopping-category').value;
+      const text = input.value.trim();
+
+      if (text) {
+        shoppingItems.push({
+          id: Date.now(),
+          text: text,
+          category: category,
+          completed: false
+        });
+        input.value = '';
+        saveState();
+        renderFullShoppingView();
+        renderDashboard();
+        showToast(`Dodano "${text}" do listy zakupów!`);
+      }
+    }
+
+    function deleteShoppingItem(id) {
+      shoppingItems = shoppingItems.filter(i => i.id !== id);
+      saveState();
+      renderFullShoppingView();
+      renderDashboard();
+    }
+
+    function clearCompletedShopping() {
+      shoppingItems = shoppingItems.filter(i => !i.completed);
+      saveState();
+      renderFullShoppingView();
+      renderDashboard();
+      showToast('Wyczyszczono kupione produkty');
+    }
+
+    function copyShoppingListToClipboard() {
+      const active = shoppingItems.filter(i => !i.completed);
+      if (active.length === 0) {
+        showToast('Lista zakupów jest pusta!');
+        return;
+      }
+      const text = "Lista zakupów:\n" + active.map(i => `• ${i.text} (${i.category || 'Dom'})`).join('\n');
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Skopiowano listę zakupów do schowka! 📋');
+      });
+    }
+
+    // Quick toggle on dashboard
+    function toggleAddShoppingInput() {
+      const form = document.getElementById('quick-shopping-form');
+      form.classList.toggle('hidden');
+      if (!form.classList.contains('hidden')) {
+        document.getElementById('new-shopping-input').focus();
+      }
+    }
+
+    function addShoppingItem() {
+      const input = document.getElementById('new-shopping-input');
+      const val = input.value.trim();
+      if (val) {
+        shoppingItems.push({
+          id: Date.now(),
+          text: val,
+          category: "Warzywa i owoce",
+          completed: false
+        });
+        input.value = '';
+        saveState();
+        renderDashboard();
+        showToast(`Dodano "${val}" do zakupów!`);
+      }
+    }
+
+    // ================= CALENDAR VIEW =================
+    const MONTH_NAMES = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
+
+    function changeMonth(delta) {
+      calendarMonthOffset += delta;
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      // Base date: May 2026 (month 4)
+      const baseYear = 2026;
+      const baseMonth = 4 + calendarMonthOffset; // 4 = May
+      const date = new Date(baseYear, baseMonth, 1);
+      const year = date.getFullYear();
+      const month = date.getMonth();
+
+      document.getElementById('calendar-month-year').innerText = `${MONTH_NAMES[month]} ${year}`;
+
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      // Polish week starts on Monday: Sunday is 0, Monday is 1...
+      let startDay = new Date(year, month, 1).getDay();
+      startDay = (startDay === 0) ? 6 : startDay - 1; // 0 for Monday
+
+      const grid = document.getElementById('calendar-days-grid');
+      grid.innerHTML = '';
+
+      // Blank padding days
+      for (let i = 0; i < startDay; i++) {
+        const blank = document.createElement('div');
+        blank.className = "h-14 sm:h-20 rounded-xl bg-cream-50/50 dark:bg-darkBg-900/30 opacity-40";
+        grid.appendChild(blank);
+      }
+
+      // Days of the month
+      for (let d = 1; d <= daysInMonth; d++) {
+        const cell = document.createElement('div');
+        const isSelected = (d === selectedCalendarDay);
+        const isToday = (month === 4 && year === 2026 && d === 13);
+        const dayEvents = calendarEvents.filter(e => e.day === d);
+
+        cell.className = `h-14 sm:h-20 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex flex-col justify-between ${
+          isSelected 
+            ? 'border-sage-500 bg-sage-50 dark:bg-sage-900/30 shadow-xs' 
+            : isToday 
+              ? 'border-amberAccent-500 bg-amberAccent-50/50 dark:bg-amberAccent-900/20' 
+              : 'border-stone-100 dark:border-darkBg-700/60 bg-cream-50/60 dark:bg-darkBg-900 hover:border-stone-300 dark:hover:border-darkBg-600'
+        }`;
+
+        cell.onclick = () => {
+          selectedCalendarDay = d;
+          renderCalendar();
+        };
+
+        const dots = dayEvents.map(e => `<span class="w-1.5 h-1.5 rounded-full bg-sage-500"></span>`).join('');
+
+        cell.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold ${isSelected ? 'text-sage-700 dark:text-sage-300 font-extrabold' : isToday ? 'text-amberAccent-600 font-extrabold' : 'text-charcoal-800 dark:text-stone-300'}">
+              ${d}
+            </span>
+            ${isToday ? `<span class="text-[9px] font-semibold px-1 py-0.2 rounded bg-amberAccent-200 dark:bg-amberAccent-800 text-amberAccent-800 dark:text-amberAccent-200 hidden sm:inline">Dziś</span>` : ''}
+          </div>
+          <div class="flex items-center gap-1 flex-wrap">
+            ${dots}
+            ${dayEvents.length > 0 ? `<span class="text-[10px] text-stone-400 font-medium hidden sm:inline truncate">${dayEvents[0].title.slice(0, 10)}...</span>` : ''}
+          </div>
+        `;
+        grid.appendChild(cell);
+      }
+
+      // Render Selected Day detail
+      renderSelectedDayEvents(month, year);
+    }
+
+    function renderSelectedDayEvents(month, year) {
+      document.getElementById('selected-day-title').innerText = `${selectedCalendarDay} ${MONTH_NAMES[month]} ${year}`;
+      const eventsList = document.getElementById('selected-day-events-list');
+      eventsList.innerHTML = '';
+
+      const dayEvents = calendarEvents.filter(e => e.day === selectedCalendarDay);
+      document.getElementById('selected-day-events-count').innerText = `${dayEvents.length} pozycji`;
+
+      if (dayEvents.length === 0) {
+        eventsList.innerHTML = `<p class="text-xs text-stone-400 py-6 text-center italic">Brak zaplanowanych wydarzeń na ten dzień ✨</p>`;
+        return;
+      }
+
+      dayEvents.forEach(evt => {
+        const item = document.createElement('div');
+        item.className = "p-3 rounded-2xl bg-cream-100/70 dark:bg-darkBg-700/60 border border-stone-200/50 dark:border-darkBg-600 flex items-center justify-between";
+
+        item.innerHTML = `
+          <div>
+            <p class="text-xs font-bold text-charcoal-900 dark:text-cream-100">${evt.title}</p>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[11px] font-mono text-stone-500">⏰ ${evt.time}</span>
+              <span class="text-[11px] text-sage-600 font-medium">👤 ${evt.person}</span>
+            </div>
+          </div>
+          <button onclick="deleteCalendarEvent(${evt.day}, '${evt.title}')" class="text-stone-400 hover:text-roseAccent-600 p-1 rounded-lg transition" title="Usuń">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        `;
+        eventsList.appendChild(item);
+      });
+    }
+
+    function deleteCalendarEvent(day, title) {
+      calendarEvents = calendarEvents.filter(e => !(e.day === day && e.title === title));
+      saveState();
+      renderCalendar();
+      showToast('Wydarzenie zostało usunięte');
+    }
+
+    function openAddEventModal() {
+      const title = prompt("Podaj nazwę wydarzenia lub dyżuru:");
+      if (title && title.trim()) {
+        const time = prompt("Godzina (np. 14:00):", "12:00") || "12:00";
+        const person = prompt("Osoba odpowiedzialna (Agnieszka, Marek, Ania, Pies, Wszyscy):", "Wszyscy") || "Wszyscy";
+        
+        calendarEvents.push({
+          day: selectedCalendarDay,
+          title: title.trim(),
+          time: time,
+          person: person
+        });
+        saveState();
+        renderCalendar();
+        showToast('Dodano wydarzenie do kalendarza! 📅');
+      }
+    }
+
+    function openAddTaskForSelectedDay() {
+      openAddTaskModal();
+      document.getElementById('task-name').value = `Dyżur ${selectedCalendarDay} maja`;
+    }
+
+    // ================= SETTINGS VIEW =================
+    function renderSettingsView() {
+      const container = document.getElementById('settings-family-list');
+      container.innerHTML = '';
+
+      familyMembers.forEach(m => {
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between p-3 rounded-2xl bg-cream-50 dark:bg-darkBg-700/50 border border-stone-100 dark:border-darkBg-600";
+
+        row.innerHTML = `
+          <div class="flex items-center gap-3">
+            <img src="${m.avatar}" class="w-10 h-10 rounded-full object-cover">
+            <div>
+              <p class="text-xs font-bold text-charcoal-900 dark:text-cream-100">${m.name}</p>
+              <p class="text-[11px] text-stone-400">${m.role}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-cream-200 dark:bg-darkBg-600 text-charcoal-800 dark:text-stone-300">
+              Cel: ${m.target} zadań
+            </span>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      // Update theme active button
+      updateThemeButtons();
+    }
+
+    function setAppTheme(theme) {
+      appTheme = theme;
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      saveState();
+      updateThemeButtons();
+      showToast(`Przełączono motyw na: ${theme === 'dark' ? 'Ciemny wieczór' : 'Ciepły krem'}`);
+    }
+
+    function updateThemeButtons() {
+      const lightBtn = document.getElementById('theme-btn-light');
+      const darkBtn = document.getElementById('theme-btn-dark');
+      if (lightBtn && darkBtn) {
+        if (appTheme === 'dark') {
+          darkBtn.classList.add('border-amberAccent-500');
+          darkBtn.classList.remove('border-transparent');
+          lightBtn.classList.remove('border-amberAccent-500');
+          lightBtn.classList.add('border-transparent');
+        } else {
+          lightBtn.classList.add('border-amberAccent-500');
+          lightBtn.classList.remove('border-transparent');
+          darkBtn.classList.remove('border-amberAccent-500');
+          darkBtn.classList.add('border-transparent');
+        }
+      }
+    }
+
+    function saveCustomQuote() {
+      const q1 = document.getElementById('quote-input-1').value.trim() || 'Małe rzeczy';
+      const q2 = document.getElementById('quote-input-2').value.trim() || 'tworzą wielki dom';
+      quotePart1 = q1;
+      quotePart2 = q2;
+      saveState();
+
+      const html = `${q1}<br>${q2}`;
+      document.getElementById('sidebar-quote-text').innerHTML = html;
+      document.getElementById('drawer-quote-text').innerHTML = html;
+      showToast('Zapisano nowe motto domowe! ♡');
+    }
+
+    function exportDataJSON() {
+      const data = { tasks, shoppingItems, familyMembers, calendarEvents, appTheme };
+      const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", str);
+      a.setAttribute("download", "dom-organizacja-dane.json");
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast('Eksportowano kopię zapasową danych');
+    }
+
+    function resetToInitialDefaults() {
+      if (confirm("Czy na pewno chcesz przywrócić początkowy stan aplikacji z projektu?")) {
+        localStorage.clear();
+        tasks = [...INITIAL_TASKS];
+        shoppingItems = [...INITIAL_SHOPPING];
+        familyMembers = [...INITIAL_FAMILY];
+        calendarEvents = [...INITIAL_EVENTS];
+        appTheme = 'light';
+        quotePart1 = 'Małe rzeczy';
+        quotePart2 = 'tworzą wielki dom';
+        document.documentElement.classList.remove('dark');
+        saveState();
+        renderDashboard();
+        showToast('Przywrócono stan fabryczny aplikacji!');
+      }
+    }
+
+    // ================= MODAL: ADD TASK =================
+    function openAddTaskModal() {
+      const modal = document.getElementById('add-task-modal');
+      const box = document.getElementById('modal-box');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        box.classList.remove('scale-95');
+      }, 10);
+      document.getElementById('task-name').focus();
+    }
+
+    function closeAddTaskModal() {
+      const modal = document.getElementById('add-task-modal');
+      const box = document.getElementById('modal-box');
+      modal.classList.add('opacity-0');
+      box.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 200);
+    }
+
+    function handleAddTaskSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('task-name').value.trim();
+      const time = document.getElementById('task-time').value;
+      const assignee = document.querySelector('input[name="assignee"]:checked').value;
+      const day = document.getElementById('task-day-select').value;
+
+      if (name) {
+        tasks.push({
+          id: Date.now(),
+          text: name,
+          assignee: assignee,
+          time: time,
+          completed: false,
+          day: day
+        });
+        saveState();
+        renderDashboard();
+        if (currentTab === 'tasks') renderFullTasksView();
+        closeAddTaskModal();
+        document.getElementById('add-task-form').reset();
+        showToast(`Dodano zadanie dla ${assignee}! 🎯`);
+      }
+    }
+
+    // ================= MODAL: FAMILY =================
+    function openFamilyModal() {
+      const modal = document.getElementById('family-modal');
+      modal.classList.remove('hidden');
+      setTimeout(() => modal.classList.remove('opacity-0'), 10);
+
+      const list = document.getElementById('family-modal-list');
+      list.innerHTML = '';
+
+      familyMembers.forEach(m => {
+        const item = document.createElement('div');
+        item.className = "flex items-center justify-between p-2.5 rounded-2xl bg-cream-50 dark:bg-darkBg-700/60";
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <img src="${m.avatar}" class="w-9 h-9 rounded-full object-cover">
+            <div>
+              <p class="text-xs font-semibold text-charcoal-900 dark:text-cream-100">${m.name}</p>
+              <p class="text-[11px] text-stone-400">${m.role}</p>
+            </div>
+          </div>
+          <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full" style="background-color: ${m.color}20; color: ${m.color}">
+            ${Math.round((m.initialDone / m.target) * 100)}%
+          </span>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function closeFamilyModal() {
+      const modal = document.getElementById('family-modal');
+      modal.classList.add('opacity-0');
+      setTimeout(() => modal.classList.add('hidden'), 200);
+    }
+
+    function promptAddNewMember() {
+      const name = prompt("Imię nowego członka rodziny:");
+      if (name && name.trim()) {
+        const role = prompt("Rola (np. Syn, Babcia, Dziadek):", "Domownik") || "Domownik";
+        familyMembers.push({
+          id: name.toLowerCase().replace(/\s+/g, '-'),
+          name: name.trim(),
+          role: role,
+          avatar: "assets/avatar-agnieszka.png",
+          initialDone: 5,
+          target: 10,
+          color: "#BD8E48"
+        });
+        saveState();
+        renderDashboard();
+        closeFamilyModal();
+        showToast(`Dodano ${name.trim()} do rodziny! 🏡`);
+      }
+    }
+
+    function copyInviteLink() {
+      navigator.clipboard.writeText(window.location.href);
+      showToast('Skopiowano link z zaproszeniem!');
+      closeFamilyModal();
+    }
+
+    function openQuoteEditorModal() {
+      switchTab('settings');
+      document.getElementById('quote-input-1').focus();
+    }
+
+    // Week navigation simulation
+    const WEEKS_LABELS = ["5 – 11 maja", "12 – 18 maja", "19 – 25 maja"];
+    let currentWeekIdx = 1;
+
+    function changeWeek(delta) {
+      currentWeekIdx = Math.max(0, Math.min(WEEKS_LABELS.length - 1, currentWeekIdx + delta));
+      document.getElementById('week-dates-label').innerText = WEEKS_LABELS[currentWeekIdx];
+      showToast(`Przełączono na tydzień: ${WEEKS_LABELS[currentWeekIdx]}`);
+    }
+
+    // Toast
+    let toastTimeout;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      text.innerText = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    // ================= GITHUB CLOUD DATABASE ENGINE =================
+    function setSyncStatus(status, text) {
+      const desktopBadge = document.getElementById('desktop-sync-badge');
+      const desktopDot = document.getElementById('desktop-sync-dot');
+      const desktopLabel = document.getElementById('desktop-sync-label');
+      const mobileDot = document.getElementById('mobile-sync-dot');
+      const mobileLabel = document.getElementById('mobile-sync-label');
+      const settingsBadge = document.getElementById('gh-settings-badge');
+
+      let dotColor = 'bg-stone-400';
+      let badgeBg = 'bg-cream-200 dark:bg-darkBg-700 text-stone-600 dark:text-stone-300';
+
+      if (status === 'synced') {
+        dotColor = 'bg-emerald-500';
+        badgeBg = 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300';
+      } else if (status === 'syncing') {
+        dotColor = 'bg-amberAccent-500 animate-pulse';
+        badgeBg = 'bg-amberAccent-100 dark:bg-amberAccent-900/30 text-amberAccent-700 dark:text-amberAccent-300';
+      } else if (status === 'error') {
+        dotColor = 'bg-roseAccent-500';
+        badgeBg = 'bg-roseAccent-100 dark:bg-roseAccent-900/30 text-roseAccent-700 dark:text-roseAccent-300';
+      }
+
+      if (desktopDot) desktopDot.className = `w-2 h-2 rounded-full ${dotColor}`;
+      if (desktopLabel) desktopLabel.innerText = text;
+      if (mobileDot) mobileDot.className = `w-1.5 h-1.5 rounded-full ${dotColor}`;
+      if (mobileLabel) mobileLabel.innerText = status === 'synced' ? 'W chmurze' : (status === 'syncing' ? 'Zapis...' : 'Lokalnie');
+
+      if (settingsBadge) {
+        settingsBadge.className = `text-[11px] font-semibold px-2.5 py-1 rounded-full ${badgeBg}`;
+        settingsBadge.innerText = (status === 'synced') ? '🟢 Połączono' : (status === 'syncing' ? '🔄 Synchronizacja...' : '⚪ Niepołączono');
+      }
+    }
+
+    async function fetchFromGitHub(showToastNotice = false) {
+      if (!ghRepo || !ghToken) {
+        setSyncStatus('idle', 'Baza: Lokalnie');
+        return false;
+      }
+
+      setSyncStatus('syncing', 'Pobieranie...');
+
+      try {
+        const cleanRepo = ghRepo.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '');
+        const url = `https://api.github.com/repos/${cleanRepo}/contents/${ghPath}?ref=${ghBranch}&t=${Date.now()}`;
+        
+        const res = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${ghToken.trim()}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+
+        if (res.status === 404) {
+          // File does not exist yet, let's create it automatically!
+          await pushToGitHub(true);
+          setSyncStatus('synced', 'Baza utworzona');
+          if (showToastNotice) showToast('Utworzono plik bazy danych w repozytorium GitHub!');
+          return true;
+        }
+
+        if (!res.ok) {
+          throw new Error(`Błąd HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        ghSha = data.sha;
+        localStorage.setItem('dom_gh_sha', ghSha);
+
+        // Safely decode UTF-8 base64
+        const binaryStr = atob(data.content.replace(/\s/g, ''));
+        const bytes = Uint8Array.from(binaryStr, c => c.charCodeAt(0));
+        const decodedStr = new TextDecoder('utf-8').decode(bytes);
+        const parsed = JSON.parse(decodedStr);
+
+        if (Array.isArray(parsed.tasks)) tasks = parsed.tasks;
+        if (Array.isArray(parsed.shopping)) shoppingItems = parsed.shopping;
+        if (Array.isArray(parsed.events)) calendarEvents = parsed.events;
+        if (Array.isArray(parsed.family)) familyMembers = parsed.family;
+        if (parsed.quote) {
+          quotePart1 = parsed.quote.part1 || quotePart1;
+          quotePart2 = parsed.quote.part2 || quotePart2;
+        }
+
+        saveState(false); // save locally without re-triggering push
+        renderDashboard();
+        if (currentTab === 'tasks') renderFullTasksView();
+        if (currentTab === 'calendar') renderCalendar();
+        if (currentTab === 'shopping') renderFullShoppingView();
+        if (currentTab === 'settings') renderSettingsView();
+
+        setSyncStatus('synced', 'GitHub: Połączono');
+        if (showToastNotice) showToast('Pobrano najnowsze dane z bazy GitHub! ☁️');
+        return true;
+      } catch (err) {
+        console.error("GitHub fetch error:", err);
+        setSyncStatus('error', 'Błąd połączenia');
+        if (showToastNotice) showToast('Błąd synchronizacji: ' + err.message);
+        return false;
+      }
+    }
+
+    let pushTimer = null;
+    function debouncedPushToGitHub() {
+      if (!ghRepo || !ghToken) return;
+      setSyncStatus('syncing', 'Zapisywanie...');
+      clearTimeout(pushTimer);
+      pushTimer = setTimeout(() => {
+        pushToGitHub(false);
+      }, 1500);
+    }
+
+    async function pushToGitHub(isInitial = false) {
+      if (!ghRepo || !ghToken) return;
+      setSyncStatus('syncing', 'Zapisywanie w GitHub...');
+
+      try {
+        const cleanRepo = ghRepo.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '');
+
+        // Fetch latest SHA if missing
+        if (!ghSha) {
+          const checkUrl = `https://api.github.com/repos/${cleanRepo}/contents/${ghPath}?ref=${ghBranch}&t=${Date.now()}`;
+          const checkRes = await fetch(checkUrl, {
+            headers: {
+              'Authorization': `Bearer ${ghToken.trim()}`,
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          });
+          if (checkRes.ok) {
+            const checkData = await checkRes.json();
+            ghSha = checkData.sha;
+            localStorage.setItem('dom_gh_sha', ghSha);
+          }
+        }
+
+        const payload = {
+          updatedAt: new Date().toISOString(),
+          tasks,
+          shopping: shoppingItems,
+          events: calendarEvents,
+          family: familyMembers,
+          quote: { part1: quotePart1, part2: quotePart2 }
+        };
+
+        const jsonStr = JSON.stringify(payload, null, 2);
+        const utf8Bytes = new TextEncoder().encode(jsonStr);
+        let binaryStr = '';
+        utf8Bytes.forEach(b => binaryStr += String.fromCharCode(b));
+        const base64Content = btoa(binaryStr);
+
+        const bodyData = {
+          message: isInitial ? "Inicjalizacja bazy danych Dom" : "Aktualizacja danych domowych",
+          content: base64Content,
+          branch: ghBranch
+        };
+        if (ghSha) bodyData.sha = ghSha;
+
+        const putUrl = `https://api.github.com/repos/${cleanRepo}/contents/${ghPath}`;
+        const putRes = await fetch(putUrl, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${ghToken.trim()}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(bodyData)
+        });
+
+        if (!putRes.ok) {
+          throw new Error(`Błąd zapisu HTTP ${putRes.status}`);
+        }
+
+        const putData = await putRes.json();
+        ghSha = putData.content.sha;
+        localStorage.setItem('dom_gh_sha', ghSha);
+        setSyncStatus('synced', 'GitHub: Połączono');
+      } catch (err) {
+        console.error("GitHub push error:", err);
+        setSyncStatus('error', 'Błąd zapisu');
+      }
+    }
+
+    async function saveAndTestGitHubConnection() {
+      const repoInput = document.getElementById('gh-repo-input');
+      const tokenInput = document.getElementById('gh-token-input');
+
+      const repoVal = repoInput ? repoInput.value.trim() : '';
+      const tokenVal = tokenInput ? tokenInput.value.trim() : '';
+
+      if (!repoVal || !tokenVal) {
+        showToast('Wpisz nazwę repozytorium oraz token GitHub!');
+        return;
+      }
+
+      ghRepo = repoVal;
+      ghToken = tokenVal;
+      localStorage.setItem('dom_gh_repo', ghRepo);
+      localStorage.setItem('dom_gh_token', ghToken);
+
+      showToast('Sprawdzanie połączenia z GitHubem...');
+      const ok = await fetchFromGitHub(true);
+      if (ok) {
+        showToast('Sukces! Twoja baza w GitHubie jest aktywna! 🎉');
+      }
+    }
+
+    function toggleTokenVisibility() {
+      const input = document.getElementById('gh-token-input');
+      if (input) {
+        input.type = input.type === 'password' ? 'text' : 'password';
+      }
+    }
+
+    function generateFamilyShareLink() {
+      if (!ghRepo || !ghToken) {
+        showToast('Najpierw połącz aplikację z GitHubem!');
+        return;
+      }
+      const baseUrl = window.location.origin + window.location.pathname;
+      const configHash = `#gh_repo=${encodeURIComponent(ghRepo)}&gh_token=${encodeURIComponent(ghToken)}`;
+      const shareUrl = baseUrl + configHash;
+
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        showToast('Skopiowano link dla rodziny do schowka! 📲');
+      }).catch(() => {
+        prompt("Skopiuj ten link i wyślij domownikom:", shareUrl);
+      });
+    }
+
+    function checkAndApplyUrlHashConfig() {
+      const hash = window.location.hash;
+      if (hash.includes('gh_repo=') && hash.includes('gh_token=')) {
+        try {
+          const params = new URLSearchParams(hash.substring(1));
+          const repo = params.get('gh_repo');
+          const token = params.get('gh_token');
+          if (repo && token) {
+            ghRepo = repo;
+            ghToken = token;
+            localStorage.setItem('dom_gh_repo', ghRepo);
+            localStorage.setItem('dom_gh_token', ghToken);
+            history.replaceState(null, '', window.location.pathname);
+            showToast('Aplikacja została automatycznie skonfigurowana! 🏡');
+            fetchFromGitHub(true);
+          }
+        } catch (e) {
+          console.error("Hash config parse error:", e);
+        }
+      }
+    }
+
+    // Escape listener
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeAddTaskModal();
+        closeFamilyModal();
+      }
+    });
+
+    // Initialize App & PWA
+    document.addEventListener('DOMContentLoaded', () => {
+      if (appTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+      document.getElementById('sidebar-quote-text').innerHTML = `${quotePart1}<br>${quotePart2}`;
+      document.getElementById('drawer-quote-text').innerHTML = `${quotePart1}<br>${quotePart2}`;
+
+      // Populate GitHub settings fields
+      const repoInput = document.getElementById('gh-repo-input');
+      const tokenInput = document.getElementById('gh-token-input');
+      if (repoInput && ghRepo) repoInput.value = ghRepo;
+      if (tokenInput && ghToken) tokenInput.value = ghToken;
+
+      checkAndApplyUrlHashConfig();
+      renderDashboard();
+
+      // Initial GitHub fetch if configured
+      if (ghRepo && ghToken) {
+        fetchFromGitHub(false);
+      } else {
+        setSyncStatus('idle', 'Baza: Lokalnie');
+      }
+
+      // Auto-poll GitHub every 20 seconds when tab is active
+      setInterval(() => {
+        if (!document.hidden && ghRepo && ghToken) {
+          fetchFromGitHub(false);
+        }
+      }, 20000);
+
+      // Fetch on tab focus / return
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && ghRepo && ghToken) {
+          fetchFromGitHub(false);
+        }
+      });
+
+      // Register PWA Service Worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('PWA Service Worker zarejestrowany'))
+          .catch(err => console.log('SW error:', err));
+      }
+    });
+  </script>
+</body>
+</html>

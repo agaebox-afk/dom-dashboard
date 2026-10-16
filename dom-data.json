@@ -1,0 +1,32 @@
+{
+  "updatedAt": "2026-10-15T21:30:00.000Z",
+  "tasks": [
+    { "id": 1, "text": "Wyprowadź psa", "assignee": "Marek", "time": "08:00", "completed": true, "day": "today" },
+    { "id": 2, "text": "Zmywanie naczyń", "assignee": "Agnieszka", "time": "12:00", "completed": true, "day": "today" },
+    { "id": 3, "text": "Wyniesienie śmieci", "assignee": "Ania", "time": "14:00", "completed": true, "day": "today" },
+    { "id": 4, "text": "Pranie", "assignee": "Agnieszka", "time": "16:00", "completed": false, "day": "today" },
+    { "id": 5, "text": "Odkurzanie salonu", "assignee": "Marek", "time": "17:00", "completed": false, "day": "today" },
+    { "id": 6, "text": "Podlewanie kwiatów", "assignee": "Ania", "time": "18:00", "completed": false, "day": "today" },
+    { "id": 7, "text": "Przygotowanie kolacji", "assignee": "Marek", "time": "19:00", "completed": false, "day": "today" },
+    { "id": 8, "text": "Składanie ubrań", "assignee": "Agnieszka", "time": "20:00", "completed": false, "day": "today" }
+  ],
+  "shopping": [
+    { "id": 1, "text": "Mleko", "category": "Nabiał", "completed": false },
+    { "id": 2, "text": "Chleb", "category": "Pieczywo", "completed": false },
+    { "id": 3, "text": "Jajka", "category": "Nabiał", "completed": false },
+    { "id": 4, "text": "Pomidory", "category": "Warzywa i owoce", "completed": false },
+    { "id": 5, "text": "Szpinak", "category": "Warzywa i owoce", "completed": false }
+  ],
+  "events": [
+    { "day": 12, "title": "Wywóz śmieci (bio i plastik)", "time": "07:00", "person": "Marek" },
+    { "day": 13, "title": "Trening Ani", "time": "16:30", "person": "Ania" },
+    { "day": 15, "title": "Wizyta weterynarza z Psem", "time": "11:00", "person": "Agnieszka" },
+    { "day": 15, "title": "Duże zakupy na weekend", "time": "18:00", "person": "Marek" },
+    { "day": 17, "title": "Rodzinny spacer do lasu", "time": "14:00", "person": "Wszyscy" },
+    { "day": 22, "title": "Urodziny Babci Krystyny 🎉", "time": "16:00", "person": "Wszyscy" }
+  ],
+  "quote": {
+    "part1": "Małe rzeczy",
+    "part2": "tworzą wielki dom"
+  }
+}
